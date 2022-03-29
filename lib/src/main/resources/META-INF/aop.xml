@@ -1,0 +1,15 @@
+<aspectj>
+    <weaver>
+        <exclude within="org.springframework.jmx..*"/>
+        <exclude within="net.sf.cglib..*)"/>
+    </weaver>
+    <aspects>
+        <aspect name="com.plexobject.aop.TracerAspect"/>
+        <weaver options="-verbose -showWeaveInfo">
+            <include within="com..*"/>
+            <!--
+            <include within="com.plexobject.aop.*"/>
+            !-->
+        </weaver>
+    </aspects>
+</aspectj>
