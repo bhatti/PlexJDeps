@@ -9,19 +9,28 @@ import java.util.Set;
 @Tracer
 public class CatalogItem {
 
-    private Integer id;
+    private String id;
     private String title;
     private String ISBN;
     private Set<String> bookAuthors;
     private String someProp;
     private Long version;
 
+    public CatalogItem() {
+    }
+
+    public CatalogItem(String id, String title, String ISBN) {
+        this.id = id;
+        this.title = title;
+        this.ISBN = ISBN;
+    }
+
     @DynamoDBHashKey(attributeName = "Id")
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer Id) {
+    public void setId(String Id) {
         this.id = Id;
     }
 

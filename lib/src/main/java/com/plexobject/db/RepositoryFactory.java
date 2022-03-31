@@ -1,35 +1,43 @@
 package com.plexobject.db;
 
+import com.sleepycat.je.DatabaseException;
+
 import java.util.HashMap;
 import java.util.Map;
-import com.sleepycat.je.DatabaseException;
 
 
 public class RepositoryFactory {
     private static final String DEP_REPO = "dependencies";
     private final DatabaseStore databaseStore;
-    private final Map<String, DependencyRepository> applicationRepositories = new HashMap<>();
+    private final boolean inMemory;
+    private final Map<String, DependencyRepository> repositories = new HashMap<>();
+
     //
-    public RepositoryFactory(final DatabaseStore databaseStore) {
+    public RepositoryFactory(final DatabaseStore databaseStore, boolean inMemory) {
         this.databaseStore = databaseStore;
+        this.inMemory = inMemory;
     }
 
-    public RepositoryFactory(final String dbName) throws DatabaseException {
-        this(new DatabaseStore(dbName, false));
+    public RepositoryFactory(final String dbName, boolean inMemory) throws DatabaseException {
+        this(new DatabaseStore(dbName, false), inMemory);
     }
 
     public RepositoryFactory() throws DatabaseException {
-        this(new DatabaseStore());
+        this(new DatabaseStore(), true);
     }
 
     public synchronized DependencyRepository getDependencyRepository() throws DatabaseException {
-        DependencyRepository repository = applicationRepositories.get(DEP_REPO);
+        DependencyRepository repository = repositories.get(DEP_REPO);
         if (repository == null) {
-            if (!databaseStore.getAllDatabases().contains(DEP_REPO)) {
-                databaseStore.createDatabase(DEP_REPO);
+            if (inMemory) {
+                repository = new DependencyRepositoryMem();
+            } else {
+                if (!databaseStore.getAllDatabases().contains(DEP_REPO)) {
+                    databaseStore.createDatabase(DEP_REPO);
+                }
+                repository = new DependencyRepositoryBDB(databaseStore.getStore(DEP_REPO), databaseStore, this);
             }
-            repository = new DependencyRepository(databaseStore.getStore(DEP_REPO), databaseStore, this);
-            applicationRepositories.put(DEP_REPO, repository);
+            repositories.put(DEP_REPO, repository);
         }
         return repository;
     }
@@ -39,7 +47,7 @@ public class RepositoryFactory {
     }
 
     public synchronized void close(final String domain) throws DatabaseException {
-        applicationRepositories.remove(domain);
+        repositories.remove(domain);
         databaseStore.close();
     }
 }

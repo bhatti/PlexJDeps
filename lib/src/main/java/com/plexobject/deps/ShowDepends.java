@@ -67,6 +67,7 @@ public class ShowDepends {
     private boolean packageOnly;
     private boolean dotSyntax;
     private String filter;
+    private boolean inMemory;
     private String[] pkgNames;
     private String[] disallowedPackages = SUN_PACKAGES;
     private SpringParser springParser = new SpringParser();
@@ -157,7 +158,7 @@ public class ShowDepends {
         Map duplicates = new HashMap();
         Iterator it = dependencies.keySet().iterator();
         DatabaseStore store = new DatabaseStore();
-        RepositoryFactory factory = new RepositoryFactory(store);
+        RepositoryFactory factory = new RepositoryFactory(store, inMemory);
         DependencyRepository repo = factory.getDependencyRepository();
         repo.clear();
         while (it.hasNext()) {
@@ -501,6 +502,8 @@ public class ShowDepends {
             } else if (args[i].equals("-v")) {
                 SpringParser.verbose = true;
                 verbose = true;
+            } else if (args[i].equals("-m")) {
+                si.inMemory = true;
             } else if (args[i].equals("-o")) {
                 filename = args[++i];
                 if (verbose) System.err.println("# will save output to " + filename);

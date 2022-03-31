@@ -40,4 +40,8 @@ public class TraceCollector {
         }
         return result;
     }
+
+    public int size() {
+        return traces.size();
+    }
 }
