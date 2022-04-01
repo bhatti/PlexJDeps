@@ -1,30 +1,25 @@
 package com.plexobject.deps;
-import java.util.*;
-import java.io.*;
-import java.io.File;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
+
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class JaxParser {
     static boolean verbose = false;
     Map<String, String> classToUrl = new HashMap<>();
     String[] pkgNames;
+
     public void add(File inputFile) {
         try {
             if (verbose) System.out.println("Parsing " + inputFile);
@@ -33,7 +28,7 @@ public class JaxParser {
             Document doc = dBuilder.parse(inputFile);
             doc.getDocumentElement().normalize();
             NodeList beans = doc.getElementsByTagName("jaxws:endpoint");
-            for (int i=0; i < beans.getLength(); i++) {
+            for (int i = 0; i < beans.getLength(); i++) {
                 Node node = beans.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element bean = (Element) node;
@@ -48,6 +43,7 @@ public class JaxParser {
             System.err.println(e);
         }
     }
+
     private boolean isValidClass(String klass) {
         if (klass == null || klass.length() == 0) {
             return false;
@@ -69,6 +65,7 @@ public class JaxParser {
             add(file);
         }
     }
+
     //
     private static Collection<File> getJaxFiles(File dir) {
         Set<File> files = new HashSet<File>();
@@ -98,7 +95,7 @@ public class JaxParser {
         for (String arg : args) {
             parser.add(new File(arg));
         }
-        for (int i=0; i<args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-p")) {
                 String packages = args[++i];
                 if (packages == null || packages.length() == 0) {

@@ -37,7 +37,7 @@ public class Dependency implements Serializable {
         shortTo = getClassName(to);
     }
 
-    static String getClassName(String str) {
+    public static String getClassName(String str) {
         String[] t = str.split("\\.");
         return t[t.length - 1];
     }

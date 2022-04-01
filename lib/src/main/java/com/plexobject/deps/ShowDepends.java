@@ -30,46 +30,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
-public class ShowDepends {
-    public static final String DISALLOWED_PACKAGES = "DISALLOWED_PACKAGES";
-    public static final String[] SUN_PACKAGES = {
-            "java.",
-            "javax.",
-            "sun.",
-            "com.sun.",
-            "org.omg."
-    };
-    public static final String[] SUN_CLASSES = {
-            "boolean",
-            "byte",
-            "char",
-            "float",
-            "double",
-            "int",
-            "long",
-            "short",
-            "I",
-            "B",
-            "C",
-            "F",
-            "D",
-            "J",
-            "S",
-            "V",
-            "Z",
-            "void"
-    };
-
-    private Map dependencies = new HashMap();
-    private List skipList = new ArrayList();
-    private List mustList = new ArrayList();
+public class ShowDepends extends BaseDepHelper {
     private static boolean verbose = false;
     private boolean packageOnly;
     private boolean dotSyntax;
     private String filter;
     private boolean inMemory;
-    private String[] pkgNames;
-    private String[] disallowedPackages = SUN_PACKAGES;
     private SpringParser springParser = new SpringParser();
     private JaxParser jaxParser = new JaxParser();
     private List<String> processed = new ArrayList<>();
@@ -196,7 +162,7 @@ public class ShowDepends {
         return tnames[tnames.length - 1];
     }
 
-    void search(String name) throws Exception {
+    public void search(String name) throws Exception {
         Set<String> duplicates = new HashSet<>();
         RepositoryFactory factory = new RepositoryFactory();
         DependencyRepository repo = factory.getDependencyRepository();
@@ -297,40 +263,7 @@ public class ShowDepends {
         out.close();
     }
 
-    private void printDotSyntax(PrintStream out) {
-        Map duplicates = new HashMap();
-        out.println("digraph G {");
-        Iterator it = dependencies.keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String) it.next();
-            String[] depend = (String[]) dependencies.get(key);
-            for (int i = 0; depend != null && i < depend.length; i++) {
-                if (acceptClass(depend[i])) {
-                    String line = "\"" + key + "\"" + " -> " + "\"" + depend[i] + "\"";
-                    String oline = "\"" + depend[i] + "\"" + " -> " + "\"" + key + "\"";
-                    if (duplicates.get(line) == null) {
-                        duplicates.put(line, Boolean.TRUE);
-                        out.println(line);
-                        if (duplicates.get(oline) != null) {
-                            out.println("#--duplicate " + line);
-                        }
-                    }
-                }
-            }
-        }
-        out.println("}");
-    }
-
-    private boolean includes(List list, String pattern) {
-        Iterator it = list.iterator();
-        while (it.hasNext()) {
-            String name = (String) it.next();
-            if (pattern.indexOf(name) != -1) return true;
-        }
-        return false;
-    }
-
-    void addClassDepend(String klass) {
+    public void addClassDepend(String klass) {
         if (processed.contains(klass)) {
             return;
         }
@@ -371,89 +304,6 @@ public class ShowDepends {
                 addClassDependFromBeanInfo(dep);
             }
         }
-    }
-
-    private void addZipDepend(String zip) {
-        JarResources jr = new JarResources(zip);
-        String[] names = jr.getResourceNames();
-        for (int i = 0; i < names.length; i++) {
-            if (names[i].endsWith(".class")) addClassDepend(file2class(names[i]));
-        }
-    }
-
-
-    private void addDirDepend(String dirname) {
-        File dir = new File(dirname);
-        List files = new ArrayList();
-        getFiles(dir.getAbsolutePath().length(), dir, files);
-        Iterator it = files.iterator();
-        while (it.hasNext()) {
-            String name = (String) it.next();
-            addClassDepend(file2class(name));
-        }
-    }
-
-
-    private void getFiles(int top, File dir, List files) {
-        File[] list = dir.listFiles();
-        for (int i = 0; list != null && i < list.length; i++) {
-            if (list[i].isDirectory()) getFiles(top, list[i], files);
-            else {
-                String name = list[i].getAbsolutePath();
-                if (name.endsWith(".class")) files.add(name.substring(top + 1));
-                else if (name.endsWith(".jar")) addZipDepend(name);
-            }
-        }
-    }
-
-    private String file2class(String name) {
-        int n = name.indexOf(".class");
-        if (n != -1) name = name.substring(0, n);
-        name = name.replace('\\', '.');
-        name = name.replace('/', '.');
-        return name;
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////
-    // PRIVATE METHODS
-    private boolean acceptClass(String name) {
-        //if (processed.indexOf(name) != -1) return false;
-        for (int i = 0; i < disallowedPackages.length; i++) {
-            if (name.startsWith(disallowedPackages[i])) return false;
-        }
-        for (int i = 0; i < SUN_CLASSES.length; i++) {
-            if (name.equals(SUN_CLASSES[i])) return false;
-        }
-        if (pkgNames == null || pkgNames.length == 0) return true;
-        for (int j = 0; j < pkgNames.length; j++) {
-            if (name.startsWith(pkgNames[j])) return true;
-        }
-        return false;
-    }
-
-
-    private boolean acceptClass(Class originaltype, String name) {
-        //System.out.println("acceptClass(" + originaltype + "," + name + ")");
-        if (name.startsWith("java.lang.") && name.indexOf('.', 10) == -1)
-            return false;
-        // inner or nested class 
-        if (name.startsWith(originaltype.getName())) return false;
-        // same package
-        if (originaltype.getPackage() != null &&
-                name.startsWith(originaltype.getPackage().getName()) &&
-                name.indexOf('.', originaltype.getPackage().getName().length() + 2) == -1)
-            return false;
-
-        // skip anonymous classes
-        int n = name.lastIndexOf('$');
-        if (n != -1 && Character.isDigit(name.charAt(n + 1))) {
-            return false;
-        }
-        for (int i = 0; i < SUN_CLASSES.length; i++) {
-            if (name.equals(SUN_CLASSES[i])) return false;
-        }
-        return true;
     }
 
     public static void main(String[] args) throws Exception {

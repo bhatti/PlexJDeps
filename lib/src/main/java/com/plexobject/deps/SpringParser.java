@@ -1,24 +1,18 @@
 package com.plexobject.deps;
-import java.util.*;
-import java.io.*;
-import java.io.File;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
+
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class SpringParser {
@@ -28,6 +22,7 @@ public class SpringParser {
     Map<String, String> idToClass = new HashMap<>();
     Map<String, String> unresolvedDeps = new HashMap<>();
     String[] pkgNames;
+
     public void add(File inputFile) {
         if (!inputFile.exists()) {
             System.out.println("Spring file doesn't exist: " + inputFile);
@@ -41,7 +36,7 @@ public class SpringParser {
             doc.getDocumentElement().normalize();
             //System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
             NodeList beans = doc.getElementsByTagName("bean");
-            for (int i=0; i < beans.getLength(); i++) {
+            for (int i = 0; i < beans.getLength(); i++) {
                 Node node = beans.item(i);
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element bean = (Element) node;
@@ -53,14 +48,14 @@ public class SpringParser {
                     String ref = null;
                     //
                     NodeList properties = bean.getElementsByTagName("property");
-                    for (int j=0; j < properties.getLength(); j++) {
+                    for (int j = 0; j < properties.getLength(); j++) {
                         Node pnode = properties.item(j);
                         if (pnode.getNodeType() == Node.ELEMENT_NODE) {
                             Element property = (Element) pnode;
                             ref = property.getAttribute("ref");
                             if (ref == null || ref.length() == 0) {
                                 NodeList refs = property.getElementsByTagName("ref");
-                                for (int k=0; k < refs.getLength(); k++) {
+                                for (int k = 0; k < refs.getLength(); k++) {
                                     Node rnode = refs.item(k);
                                     if (rnode.getNodeType() == Node.ELEMENT_NODE) {
                                         Element refnode = (Element) rnode;
@@ -93,6 +88,7 @@ public class SpringParser {
             System.err.println(e);
         }
     }
+
     private boolean isValidClass(String klass) {
         if (klass == null || klass.length() == 0) {
             return false;
@@ -116,7 +112,7 @@ public class SpringParser {
             BeanInfo rinfo = idToInfos.get(rdep);
             if (info != null && rinfo != null) {
                 info.addChild(rinfo);
-            } else { 
+            } else {
                 //System.out.println("Could not resolve " + dep + "->" + rdep);
             }
         }
@@ -124,6 +120,7 @@ public class SpringParser {
             if (verbose) System.out.println(info);
         }
     }
+
     public void addAllSpringFiles() {
         add(new File("spring-app.xml"));
         Collection<File> files = getSpringFiles(new File("."));
@@ -132,6 +129,7 @@ public class SpringParser {
         }
         aggregate();
     }
+
     //
     private static Collection<File> getSpringFiles(File dir) {
         Set<File> files = new HashSet<File>();
@@ -160,7 +158,7 @@ public class SpringParser {
         for (String arg : args) {
             parser.add(new File(arg));
         }
-        for (int i=0; i<args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-p")) {
                 String packages = args[++i];
                 if (packages == null || packages.length() == 0) {

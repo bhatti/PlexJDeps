@@ -23,13 +23,13 @@ public class RepositoryFactory {
     }
 
     public RepositoryFactory() throws DatabaseException {
-        this(new DatabaseStore(), true);
+        this(System.getProperty("user.home") + System.getProperty("file.separator") + ".deps", true);
     }
 
     public synchronized DependencyRepository getDependencyRepository() {
         DependencyRepository repository = repositories.get(DEP_REPO);
         if (repository == null) {
-            if (inMemory) {
+            if (false && inMemory) {
                 repository = DependencyRepositoryMem.create("deps.ser");
             } else {
                 if (!databaseStore.getAllDatabases().contains(DEP_REPO)) {

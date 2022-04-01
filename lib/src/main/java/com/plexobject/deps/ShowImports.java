@@ -23,28 +23,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
 
-public class ShowImports {
-    public static final String[] SUN_CLASSES = {
-            "boolean",
-            "byte",
-            "char",
-            "float",
-            "double",
-            "int",
-            "long",
-            "short",
-            "I",
-            "B",
-            "C",
-            "F",
-            "D",
-            "J",
-            "S",
-            "V",
-            "Z",
-            "void"
-    };
-
+public class ShowImports extends BaseDepHelper {
     public static void main(String[] args) throws Exception {
         ShowImports si = new ShowImports();
         String[] imports;
@@ -98,29 +77,5 @@ public class ShowImports {
         }
         Arrays.sort(imports);
         return imports;
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-    // PRIVATE METHODS
-    private boolean acceptClass(Class originaltype, String name) {
-        if (name.startsWith("java.lang.") && name.indexOf('.', 10) == -1)
-            return false;
-        // inner or nested class
-        if (name.startsWith(originaltype.getName())) return false;
-        // same package
-        if (originaltype.getPackage() != null &&
-                name.startsWith(originaltype.getPackage().getName()) &&
-                name.indexOf('.', originaltype.getPackage().getName().length() + 2) == -1)
-            return false;
-
-        // skip anonymous classes
-        int n = name.lastIndexOf('$');
-        if (n != -1 && Character.isDigit(name.charAt(n + 1))) {
-            return false;
-        }
-        for (int i = 0; i < SUN_CLASSES.length; i++) {
-            if (name.equals(SUN_CLASSES[i])) return false;
-        }
-        return true;
     }
 }
