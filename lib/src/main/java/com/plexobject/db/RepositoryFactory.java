@@ -29,7 +29,7 @@ public class RepositoryFactory {
     public synchronized DependencyRepository getDependencyRepository() {
         DependencyRepository repository = repositories.get(DEP_REPO);
         if (repository == null) {
-            if (false && inMemory) {
+            if (inMemory) {
                 repository = DependencyRepositoryMem.create("deps.ser");
             } else {
                 if (!databaseStore.getAllDatabases().contains(DEP_REPO)) {
