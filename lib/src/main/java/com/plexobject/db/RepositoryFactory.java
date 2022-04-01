@@ -18,7 +18,7 @@ public class RepositoryFactory {
         this.inMemory = inMemory;
     }
 
-    public RepositoryFactory(final String dbName, boolean inMemory) throws DatabaseException {
+    public RepositoryFactory(final String dbName, boolean inMemory) {
         this(new DatabaseStore(dbName, false), inMemory);
     }
 
@@ -26,11 +26,11 @@ public class RepositoryFactory {
         this(new DatabaseStore(), true);
     }
 
-    public synchronized DependencyRepository getDependencyRepository() throws DatabaseException {
+    public synchronized DependencyRepository getDependencyRepository() {
         DependencyRepository repository = repositories.get(DEP_REPO);
         if (repository == null) {
             if (inMemory) {
-                repository = new DependencyRepositoryMem();
+                repository = DependencyRepositoryMem.create("deps.ser");
             } else {
                 if (!databaseStore.getAllDatabases().contains(DEP_REPO)) {
                     databaseStore.createDatabase(DEP_REPO);

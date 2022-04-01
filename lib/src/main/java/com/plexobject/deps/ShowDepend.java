@@ -120,7 +120,7 @@ public class ShowDepend {
         return imports;
     }
 
-    private void printDotSyntax(final String filename) {
+    public void printDotSyntax(final String filename) {
         PrivilegedAction action = new PrivilegedAction() {
             public Object run() {
                 try {
@@ -138,13 +138,9 @@ public class ShowDepend {
         AccessController.doPrivileged(action);
     }
 
-    void printDotSyntax(PrintStream out) throws Exception {
+    public void printDotSyntax(PrintStream out) throws Exception {
         Map duplicates = new HashMap();
         out.println("digraph G {");
-        //out.println("  orientation = landscape;");
-        //out.println("  size=\"10,8\";");
-        //out.println("  ratio=\"fill\";");
-        //out.println("  page=\"8.5,11\";");
         Iterator it = dependencies.keySet().iterator();
         while (it.hasNext()) {
             String key = (String) it.next();
@@ -175,7 +171,7 @@ public class ShowDepend {
         return false;
     }
 
-    void addClassDepend(String klass) throws Exception {
+    public void addClassDepend(String klass) throws Exception {
         if (checkSM && System.getSecurityManager() != null) {
             if (verbose) System.err.println("# set security manager");
             checkSM = false;
@@ -200,7 +196,7 @@ public class ShowDepend {
     }
 
 
-    private void addZipDepend(String zip) throws Exception {
+    public void addZipDepend(String zip) throws Exception {
         JarResources jr = new JarResources(zip);
         String[] names = jr.getResourceNames();
         for (int i = 0; i < names.length; i++) {
@@ -209,7 +205,7 @@ public class ShowDepend {
     }
 
 
-    private void addDirDepend(String dirname) throws Exception {
+    public void addDirDepend(String dirname) throws Exception {
         File dir = new File(dirname);
         List files = new ArrayList();
         getFiles(dir.getAbsolutePath().length(), dir, files);

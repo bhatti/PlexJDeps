@@ -5,9 +5,12 @@ import com.sleepycat.persist.model.PrimaryKey;
 import com.sleepycat.persist.model.Relationship;
 import com.sleepycat.persist.model.SecondaryKey;
 
+import java.io.Serializable;
+
 
 @Entity
-public class Dependency {
+public class Dependency implements Serializable {
+    private static final long serialVersionUID = 1L;
     @PrimaryKey
     public String id;
 

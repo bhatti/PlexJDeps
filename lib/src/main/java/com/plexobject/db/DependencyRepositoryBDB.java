@@ -1,6 +1,5 @@
 package com.plexobject.db;
 
-import com.sleepycat.je.DatabaseException;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.EntityStore;
@@ -22,7 +21,7 @@ public class DependencyRepositoryBDB implements DependencyRepository {
     private SecondaryIndex<String, String, Dependency> shortFromIndex;
     private SecondaryIndex<String, String, Dependency> shortToIndex;
 
-    public DependencyRepositoryBDB(EntityStore entityStore, final DatabaseStore databaseStore, final RepositoryFactory repositoryFactory) throws DatabaseException {
+    public DependencyRepositoryBDB(EntityStore entityStore, final DatabaseStore databaseStore, final RepositoryFactory repositoryFactory) {
         this.store = entityStore;
         this.databaseStore = databaseStore;
         this.repositoryFactory = repositoryFactory;
@@ -35,7 +34,7 @@ public class DependencyRepositoryBDB implements DependencyRepository {
     }
 
     @Override
-    public Set<Dependency> getAll() throws DatabaseException {
+    public Set<Dependency> getAll() {
         Set<Dependency> all = new HashSet<>();
         databaseStore.beginTransaction();
         EntityCursor<Dependency> cursor = primaryIndex.entities(null, false, null, true);
@@ -49,7 +48,7 @@ public class DependencyRepositoryBDB implements DependencyRepository {
 
 
     @Override
-    public Set<Dependency> getDependenciesFrom(String from) throws DatabaseException {
+    public Set<Dependency> getDependenciesFrom(String from) {
         Set<Dependency> all = new HashSet<>();
         databaseStore.beginTransaction();
         boolean isShort = from.split("\\.").length == 1;
@@ -63,7 +62,7 @@ public class DependencyRepositoryBDB implements DependencyRepository {
     }
 
     @Override
-    public Set<Dependency> getDependenciesTo(String to) throws DatabaseException {
+    public Set<Dependency> getDependenciesTo(String to) {
         Set<Dependency> all = new HashSet<>();
         databaseStore.beginTransaction();
         boolean isShort = to.split("\\.").length == 1;
@@ -76,14 +75,14 @@ public class DependencyRepositoryBDB implements DependencyRepository {
         return all;
     }
 
-    public Dependency findById(String id) throws DatabaseException {
+    public Dependency findById(String id) {
         databaseStore.beginTransaction();
         Dependency d = primaryIndex.get(id);
         databaseStore.commitTransaction();
         return d;
     }
 
-    public boolean remove(String id) throws DatabaseException {
+    public boolean remove(String id) {
         databaseStore.beginTransaction();
         boolean d = primaryIndex.delete(id);
         databaseStore.commitTransaction();
@@ -91,7 +90,7 @@ public class DependencyRepositoryBDB implements DependencyRepository {
     }
 
     @Override
-    public Dependency save(Dependency object) throws DatabaseException {
+    public Dependency save(Dependency object) {
         databaseStore.beginTransaction();
         Dependency d = primaryIndex.put(object);
         databaseStore.commitTransaction();
@@ -99,7 +98,7 @@ public class DependencyRepositoryBDB implements DependencyRepository {
     }
 
     @Override
-    public void clear() throws DatabaseException {
+    public void clear() {
         databaseStore.beginTransaction();
         store.truncateClass(Dependency.class);
         databaseStore.commitTransaction();

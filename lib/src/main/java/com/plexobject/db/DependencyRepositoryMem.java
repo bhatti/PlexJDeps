@@ -1,20 +1,33 @@
 package com.plexobject.db;
 
-import com.sleepycat.je.DatabaseException;
-
+import java.io.*;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class DependencyRepositoryMem implements DependencyRepository {
+public class DependencyRepositoryMem implements DependencyRepository, Serializable {
+    private static final long serialVersionUID = 1L;
     private final ConcurrentHashMap<String, Dependency> lookupByID = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> depsFrom = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Set<String>> depsTo = new ConcurrentHashMap<>();
+    private String serializeFileName;
+
+    public static DependencyRepository create(String name) {
+        try {
+            ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(name)));
+            DependencyRepositoryMem repo = (DependencyRepositoryMem) in.readObject();
+            repo.serializeFileName = name;
+            return repo;
+        } catch (Throwable e) {
+            System.err.println("Failed to load " + name + ": " + e);
+            return new DependencyRepositoryMem();
+        }
+    }
 
     @Override
-    public Set<Dependency> getAll() throws DatabaseException {
+    public Set<Dependency> getAll() {
         Set<Dependency> all = new HashSet<>();
         all.addAll(lookupByID.values());
         return all;
@@ -47,7 +60,7 @@ public class DependencyRepositoryMem implements DependencyRepository {
     }
 
     @Override
-    public Dependency save(Dependency d) throws DatabaseException {
+    public Dependency save(Dependency d) {
         lookupByID.putIfAbsent(d.getId(), d);
         depsFrom.putIfAbsent(d.getFrom(), new HashSet<>());
         depsTo.putIfAbsent(d.getTo(), new HashSet<>());
@@ -57,7 +70,7 @@ public class DependencyRepositoryMem implements DependencyRepository {
     }
 
     @Override
-    public void clear() throws DatabaseException {
+    public void clear() {
         lookupByID.clear();
         depsFrom.clear();
         depsTo.clear();
@@ -65,6 +78,15 @@ public class DependencyRepositoryMem implements DependencyRepository {
 
     @Override
     public void close() {
+        if (serializeFileName != null) {
+            try {
+                ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(serializeFileName)));
+                out.writeObject(this);
+                out.close();
+            } catch (Throwable e) {
+                System.err.println("Failed to save " + serializeFileName + ": " + e);
+            }
+        }
         clear();
     }
 }

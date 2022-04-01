@@ -19,11 +19,11 @@ public class DatabaseStore {
 
     private static final ThreadLocal<Transaction> CURRENT_TXN = new ThreadLocal<>();
 
-    public DatabaseStore() throws DatabaseException {
+    public DatabaseStore() {
         this(System.getProperty("user.home") + System.getProperty("file.separator") + ".deps", false);
     }
 
-    public DatabaseStore(final String databaseDir, boolean txn) throws DatabaseException {
+    public DatabaseStore(final String databaseDir, boolean txn) {
         this.txn = txn;
         // Open the DB environment. Create if they do not already exist.
         EnvironmentConfig envConfig = new EnvironmentConfig();
@@ -42,7 +42,7 @@ public class DatabaseStore {
     }
 
     //
-    synchronized EntityStore getStore(final String domain) throws DatabaseException {
+    synchronized EntityStore getStore(final String domain) {
         EntityStore store = stores.get(domain);
         if (store == null) {
             store = new EntityStore(dbEnvironment, domain, storeConfig);
@@ -51,11 +51,11 @@ public class DatabaseStore {
         return store;
     }
 
-    Collection<String> getAllDatabases() throws DatabaseException {
+    Collection<String> getAllDatabases() {
         return dbEnvironment.getDatabaseNames();
     }
 
-    void removeDatabase(final String domain) throws DatabaseException {
+    void removeDatabase(final String domain) {
         close(domain);
         Database db = databases.get(domain);
         if (db != null) {
@@ -64,7 +64,7 @@ public class DatabaseStore {
         dbEnvironment.removeDatabase(null, domain);
     }
 
-    void createDatabase(final String domain) throws DatabaseException {
+    void createDatabase(final String domain) {
         DatabaseConfig dbconfig = new DatabaseConfig();
         dbconfig.setAllowCreate(true);
         dbconfig.setSortedDuplicates(false);
@@ -76,7 +76,7 @@ public class DatabaseStore {
         getStore(domain);
     }
 
-    synchronized void close(final String domain) throws DatabaseException {
+    synchronized void close(final String domain) {
         EntityStore store = stores.remove(domain);
         if (store != null) {
             try {
@@ -86,7 +86,7 @@ public class DatabaseStore {
         }
     }
 
-    public void close() throws DatabaseException {
+    public void close() {
         if (dbEnvironment == null) {
             return;
         }
@@ -102,13 +102,13 @@ public class DatabaseStore {
         }
     }
 
-    void beginTransaction() throws DatabaseException {
+    void beginTransaction() {
         if (txn) {
             CURRENT_TXN.set(dbEnvironment.beginTransaction(null, null));
         }
     }
 
-    void commitTransaction() throws DatabaseException {
+    void commitTransaction() {
         if (txn) {
             Transaction txn = CURRENT_TXN.get();
             if (txn != null) {
@@ -117,7 +117,7 @@ public class DatabaseStore {
         }
     }
 
-    void abortTransaction() throws DatabaseException {
+    void abortTransaction() {
         if (txn) {
             Transaction txn = CURRENT_TXN.get();
             if (txn != null) {

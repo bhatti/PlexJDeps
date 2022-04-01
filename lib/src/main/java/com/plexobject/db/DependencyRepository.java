@@ -1,19 +1,17 @@
 package com.plexobject.db;
 
-import com.sleepycat.je.DatabaseException;
-
 import java.util.Set;
 
 public interface DependencyRepository {
-    Set<Dependency> getAll() throws DatabaseException;
+    Set<Dependency> getAll();
 
-    Set<Dependency> getDependenciesFrom(String from) throws DatabaseException;
+    Set<Dependency> getDependenciesFrom(String from);
 
-    Set<Dependency> getDependenciesTo(String to) throws DatabaseException;
+    Set<Dependency> getDependenciesTo(String to);
 
-    Dependency save(Dependency object) throws DatabaseException;
+    Dependency save(Dependency object);
 
-    void clear() throws DatabaseException;
+    void clear();
 
     void close();
 }

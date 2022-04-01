@@ -154,7 +154,7 @@ public class ShowDepends {
         return imports;
     }
 
-    void saveDependencies() throws Exception {
+    public void saveDependencies() throws Exception {
         Map duplicates = new HashMap();
         Iterator it = dependencies.keySet().iterator();
         DatabaseStore store = new DatabaseStore();
