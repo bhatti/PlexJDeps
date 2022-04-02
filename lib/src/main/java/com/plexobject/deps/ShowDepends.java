@@ -132,7 +132,7 @@ public class ShowDepends extends BaseDepHelper {
             String[] depend = (String[]) dependencies.get(key);
             for (int i = 0; depend != null && i < depend.length; i++) {
                 if (acceptClass(depend[i])) {
-                    String line = "\"" + key + "\"" + " -> " + "\"" + depend[i] + "\"";
+                    String line = "  \"" + key + "\"" + " -> " + "\"" + depend[i] + "\"";
                     if (duplicates.get(line) == null) {
                         duplicates.put(line, Boolean.TRUE);
                         Dependency dep = new Dependency(key, depend[i]);
@@ -152,7 +152,7 @@ public class ShowDepends extends BaseDepHelper {
             }
         }
         Set<Dependency> all = repo.getAll();
-        System.out.println("Saved " + all.size() + " dependencies");
+        System.err.println("Saved " + all.size() + " dependencies");
         repo.close();
         store.close();
     }
@@ -175,7 +175,7 @@ public class ShowDepends extends BaseDepHelper {
         }
         if (from.size() > 0) {
             if (!dotSyntax) {
-                System.out.println(name + " depends on:");
+                System.err.println(name + " depends on:");
             }
             for (Dependency d : from) {
                 if (filter == null || d.to.contains(filter)) {

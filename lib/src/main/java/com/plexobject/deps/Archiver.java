@@ -24,7 +24,6 @@ import java.io.*;
 public class Archiver {
   public static void archive(File target, File dir) throws IOException {
     File[] files = listFiles(dir); 
-    //System.out.println("archive(" + target + ", " + dir + ": " + files.length);
     File parent = dir.getParentFile();
     if (parent == null) {
       String[] x = StringHelper.split(dir.getAbsolutePath(), fsep);
@@ -36,7 +35,6 @@ public class Archiver {
       }
       parent = new File(sb.toString());
     }
-    //if (debug) System.out.println("archive(" + target + "," + parent + "," + files.length + ")");
     archive(target, parent, files);
   }
 
@@ -70,20 +68,6 @@ public class Archiver {
       }
     }
 
-
-/*
-    if (parent == null) {
-      String[] min = null;
-      for (int i=0; i<files.length; i++) {
-        if (debug) System.out.println("StringHelper.split(" + files[i] + "," + fsep + ")");
-        String[] x = StringHelper.split(files[i].getAbsolutePath(), fsep);
-        if (min == null || x.length < min.length) min = x;
-      }
-      File minf = new File(StringHelper.join(min, fsep));
-      if (minf.isDirectory()) parent = minf;
-      else minf = parent.getParentFile();
-    }
-*/
 
     int parlen = parent != null ? parent.getAbsolutePath().length() : 0;
     for (int i=0; i<files.length; i++) {

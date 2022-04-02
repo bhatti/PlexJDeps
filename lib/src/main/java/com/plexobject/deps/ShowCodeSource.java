@@ -26,14 +26,12 @@ public class ShowCodeSource {
                 Class type = Class.forName(args[i]);
                 java.security.CodeSource cs = type.getProtectionDomain().getCodeSource();
                 if (cs.getLocation() != null) {
-                    System.out.println(type.getName() + " loaded from " +
-                            cs.getLocation().toExternalForm());
+                    System.out.println(type.getName() + " loaded from " + cs.getLocation().toExternalForm());
                 } else {
-                    System.out.println("Unable to find code source for " + type.getName());
+                    System.err.println("Unable to find code source for " + type.getName());
                 }
             } catch (Exception e) {
-                System.out.println("Unable to find code source for " + args[i] +
-                        ": " + e);
+                System.err.println("Unable to find code source for " + args[i] + ": " + e);
             }
         }
     }

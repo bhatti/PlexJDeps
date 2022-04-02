@@ -1,4 +1,4 @@
-package com.plexobject.demo.dao;
+package com.plexobject.demo.ddb.dao;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -7,8 +7,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.plexobject.aop.Tracer;
-import com.plexobject.demo.ddb.CatalogItem;
-import com.plexobject.demo.ddb.MusicItems;
+import com.plexobject.demo.ddb.model.CatalogItem;
+import com.plexobject.demo.ddb.model.MusicItems;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +58,7 @@ public class DDBMapper {
         }
     }
 
+    @Tracer
     public MusicItems saveMusic() {
         MusicItems items = new MusicItems();
         // Add new content to the Music table
@@ -69,11 +70,13 @@ public class DDBMapper {
         return items;
     }
 
+    @Tracer
     public MusicItems updateMusic(MusicItems items) {
         mapper.save(items);
         return items;
     }
 
+    @Tracer
     public MusicItems loadMusic(String artistName, String songQueryTitle) {
         return mapper.load(MusicItems.class, artistName, songQueryTitle);
     }
@@ -153,10 +156,12 @@ public class DDBMapper {
         return item;
     }
 
+    @Tracer
     public long countCatalog() {
         return mapper.count(CatalogItem.class, new DynamoDBScanExpression());
     }
 
+    @Tracer
     public CatalogItem loadCatalog(String id) {
         return mapper.load(CatalogItem.class, id);
     }

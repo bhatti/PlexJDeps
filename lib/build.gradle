@@ -48,3 +48,14 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+task fatJar(type: Jar, dependsOn: jar) {
+	manifest {
+        attributes 'Implementation-Title': 'PlexJDeps',
+        	'Implementation-Version': project.property('version'),
+        	'Main-Class': 'com.plexobject.deps.ShowDepend'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+

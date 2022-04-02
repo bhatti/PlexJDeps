@@ -25,16 +25,15 @@ public class SpringParser {
 
     public void add(File inputFile) {
         if (!inputFile.exists()) {
-            System.out.println("Spring file doesn't exist: " + inputFile);
+            System.err.println("Spring file doesn't exist: " + inputFile);
             return;
         }
         try {
-            if (verbose) System.out.println("Parsing " + inputFile);
+            if (verbose) System.err.println("Parsing " + inputFile);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(inputFile);
             doc.getDocumentElement().normalize();
-            //System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
             NodeList beans = doc.getElementsByTagName("bean");
             for (int i = 0; i < beans.getLength(); i++) {
                 Node node = beans.item(i);
@@ -112,8 +111,6 @@ public class SpringParser {
             BeanInfo rinfo = idToInfos.get(rdep);
             if (info != null && rinfo != null) {
                 info.addChild(rinfo);
-            } else {
-                //System.out.println("Could not resolve " + dep + "->" + rdep);
             }
         }
         for (BeanInfo info : idToInfos.values()) {

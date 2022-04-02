@@ -1,18 +1,18 @@
-package com.plexobject.demo;
+package com.plexobject.demo.ddb.dao;
 
 import com.plexobject.aop.DynamicLoad;
 import com.plexobject.aop.Trace;
 import com.plexobject.aop.TraceCollector;
-import com.plexobject.demo.dao.DDBMapper;
-import com.plexobject.demo.ddb.CatalogItem;
-import com.plexobject.demo.ddb.MusicItems;
+import com.plexobject.demo.AOPDemo;
+import com.plexobject.demo.ddb.model.CatalogItem;
+import com.plexobject.demo.ddb.model.MusicItems;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class AOPDemoTest {
+public class DDBMapperTest {
     private final DDBMapper mapper = new DDBMapper();
 
     @BeforeEach
@@ -45,7 +45,7 @@ public class AOPDemoTest {
     }
 
     @Test
-    void tesSaveMusic() {
+    void tesUpdateMusic() {
         MusicItems saved = mapper.saveMusic();
         MusicItems loaded = mapper.loadMusic(saved.getArtist(), saved.getSongTitle());
         System.out.println("Item retrieved:" + loaded);
@@ -54,7 +54,7 @@ public class AOPDemoTest {
     }
 
     @Test
-    void testSaveCatalog() {
+    void testUpdateCatalog() {
         CatalogItem saved = mapper.saveCatalog();
         CatalogItem loaded = mapper.loadCatalog(saved.getId());
         System.out.println(loaded + "::::: " + mapper.countCatalog());

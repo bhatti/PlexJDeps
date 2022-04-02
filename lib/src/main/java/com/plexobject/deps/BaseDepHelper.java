@@ -1,7 +1,5 @@
 package com.plexobject.deps;
 
-import com.plexobject.db.Dependency;
-
 import java.io.File;
 import java.io.PrintStream;
 import java.util.*;
@@ -49,14 +47,19 @@ public abstract class BaseDepHelper {
         Map duplicates = new HashMap();
         out.println("digraph G {");
         Iterator it = dependencies.keySet().iterator();
+        Set visited = new HashSet();
         while (it.hasNext()) {
             String key = (String) it.next();
-            printDotSyntax(out, duplicates, key);
+            printDotSyntax(out, duplicates, key, visited);
         }
         out.println("}");
     }
 
-    public void printDotSyntax(PrintStream out, Map duplicates, String key) {
+    public void printDotSyntax(PrintStream out, Map duplicates, String key, Set visited) {
+        if (visited.contains(key)) {
+            return;
+        }
+        visited.add(key);
         String[] depend = (String[]) dependencies.get(key);
         if (depend == null) {
             return;
@@ -64,19 +67,21 @@ public abstract class BaseDepHelper {
         for (int i = 0; i < depend.length; i++) {
             String to = depend[i];
             printDotSyntax(out, duplicates, key, to);
-            printDotSyntax(out, duplicates, to);
+            printDotSyntax(out, duplicates, to, visited);
         }
     }
 
     void printDotSyntax(PrintStream out, Map duplicates, String key, String to) {
         if (acceptClass(to)) {
-            String line = "\"" + Dependency.getClassName(key) + "\"" + " -> " + "\"" + Dependency.getClassName(to) + "\"";
-            String oline = "\"" + Dependency.getClassName(to) + "\"" + " -> " + "\"" + Dependency.getClassName(key) + "\"";
+            //String line = "  \"" + Dependency.getClassName(key) + "\"" + " -> " + "\"" + Dependency.getClassName(to) + "\"";
+            //String oline = "  \"" + Dependency.getClassName(to) + "\"" + " -> " + "\"" + Dependency.getClassName(key) + "\"";
+            String line = "  \"" + key + "\"" + " -> " + "\"" + to + "\"";
+            String oline = "  \"" + to + "\"" + " -> " + "\"" + key + "\"";
             if (duplicates.get(line) == null) {
                 duplicates.put(line, Boolean.TRUE);
                 out.println(line);
                 if (duplicates.get(oline) != null) {
-                    out.println("#--duplicate " + line);
+                    //out.println("#--duplicate " + line);
                 }
             }
         }

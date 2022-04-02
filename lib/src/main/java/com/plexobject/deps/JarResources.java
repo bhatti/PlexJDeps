@@ -164,10 +164,9 @@ public final class JarResources {
         JarResources jr = new JarResources(args[0]);
         byte[] buff = jr.getResource(args[1]);
         if (buff == null) {
-            System.out.println("Could not find " + args[1] + ".");
+            System.err.println("Could not find " + args[1] + ".");
         } else {
-            System.out.println("Found " + args[1] +
-                    " (length=" + buff.length + ").");
+            System.out.println("Found " + args[1] + " (length=" + buff.length + ").");
         }
     }
 }       // End of JarResources class.

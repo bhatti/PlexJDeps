@@ -22,7 +22,7 @@ public class JaxParser {
 
     public void add(File inputFile) {
         try {
-            if (verbose) System.out.println("Parsing " + inputFile);
+            if (verbose) System.err.println("Parsing " + inputFile);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(inputFile);
@@ -111,6 +111,5 @@ public class JaxParser {
             }
         }
         parser.addAllJaxFiles();
-        //System.out.println(parser.classToUrl);
     }
 }

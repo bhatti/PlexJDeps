@@ -68,10 +68,6 @@ public class TypesExtractor {
         }
         String[] types = new String[list.size()];
         list.copyInto(types);
-/*
-    System.out.println("getComponentType(" + name + ") returning " + 
-        types.length + " types");
-*/
         return types;
     }
 
@@ -85,7 +81,6 @@ public class TypesExtractor {
 
     public static InputStream getInputStreamUsingClassInfo(String type, StringBuffer sbPath) {
         String path = TypesExtractor.getPath(type);
-        //System.out.println("TypesExtractor.getInputStreamUsingClassInfo(" + type + ") got path " + path);
         InputStream in = null;
         if (path != null) {
             //System.out.println("Loading " + type + " from " + path);
@@ -107,18 +102,6 @@ public class TypesExtractor {
                 e.printStackTrace();
             }
         }
-/*
-    try {
-      Class c = Class.forName(type);
-      //String resource = type.replace('.', separator).concat(".class");
-      String resource = type.replace('.', '/').concat(".class");
-      in = c.getResourceAsStream(type);
-      System.out.println("TypesExtractor.getInputStreamUsingClassInfo(" + type + ") resource " + resource + " got in " + in);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-*/
-        //System.out.println(type + " not found in class-path");
         return in;
     }
 
@@ -136,7 +119,7 @@ public class TypesExtractor {
                 }
                 if (in == null) return;
                 ClassParser parser = new ClassParser();
-                ClassParser.ClassFile[] classInfo = parser.process(in);
+                ClassParser.ClassFile[] classInfo = parser.process(in, path);
                 String[] types = ClassParser.getTypes(classInfo);
                 for (int i = 0; i < types.length; i++) {
                     if (extracted.indexOf(types[i]) == -1) extracted.addElement(types[i]);
@@ -236,7 +219,7 @@ public class TypesExtractor {
         java.security.CodeSource cs = type.getProtectionDomain().getCodeSource();
         if (cs != null && cs.getLocation() != null) {
             String location = cs.getLocation().toExternalForm();
-            System.out.println(type.getName() + " loaded from " + location);
+            System.err.println(type.getName() + " loaded from " + location);
             String typepkg = type.getPackage() != null ? type.getPackage().getName() :
                     "";
             java.io.File dir = new java.io.File(location + separator +
@@ -297,7 +280,7 @@ public class TypesExtractor {
             }
             in.close();
         } catch (Exception e) {
-            System.out.println("Unable to invoke (javap " + type.getName() +
+            System.err.println("Unable to invoke (javap " + type.getName() +
                     ") :" + e.toString());
             e.printStackTrace();
             System.exit(2);
@@ -397,8 +380,8 @@ public class TypesExtractor {
                 vecTypes.addElement(rtype);
             }
         } catch (Exception e) {
-            System.out.println("Error parsing: " + line);
-            e.printStackTrace(System.out);
+            System.err.println("Error parsing: " + line);
+            e.printStackTrace();
             System.exit(3);
         }
 
@@ -412,10 +395,6 @@ public class TypesExtractor {
             }
             String[] types = getComponentType(type);
             if (types == null) {
-/*
-        if (type != null && type.length() > 0)
-          System.out.println("Unable to parse type [" + type + "] " + line);
-*/
                 continue;
             }
             for (int i = 0; i < types.length; i++) finalTypes.addElement(types[i]);
@@ -450,14 +429,6 @@ public class TypesExtractor {
         if (location.startsWith("file:")) {
             location = location.substring(5);
         }
-/*
-    if ((ndx= location.lastIndexOf(":")) != -1) {
-      location = location.substring(ndx+1);
-    }
-    if ((ndx= location.indexOf("cygwin")) != -1) {
-      location = location.substring(ndx-1);
-    }
-*/
         File file = new File(location);
         if (!file.exists()) {
             if (location.startsWith("jar:file")) {
@@ -465,9 +436,8 @@ public class TypesExtractor {
                 int end = location.indexOf('!');
                 return location.substring(start + 1, end);
             }
-            System.err.println("Failed to find resource " + resource + " at\n\t" +
-                    location + " url\n\t" + url);
-            System.exit(10);
+            System.err.println("Failed to find resource '" + resource + "' at [" + location + "] url [" + url + "]");
+            return null;
         }
         //System.out.println("******* location " + location);
         if ((ndx = location.indexOf(resource)) != -1)
@@ -478,9 +448,6 @@ public class TypesExtractor {
             return location.substring(0, ndx);
         if (location.endsWith(".class")) return location; // added 5/15/01
         String clsname = null;
-        //if ((ndx=typename.lastIndexOf('.')) == -1) clsname = typename;
-        //else clsname = typename.substring(ndx+1);
-        //return location + clsname + ".class";
         return location + typename.replace('.', separator) + ".class";
     }
 
@@ -496,12 +463,12 @@ public class TypesExtractor {
             String entry = type.replace('.', '/') + ".class";
             byte[] data = jr.getResource(entry);
             if (data == null) {
-                System.out.println("Resource [" + entry + "] not found in " + file);
+                System.err.println("Resource [" + entry + "] not found in " + file);
                 return null;
             }
             return new DataInputStream(new ByteArrayInputStream(data));
         } else {
-            System.out.println("Unknown resource type " + file);
+            System.err.println("Unknown resource type " + file);
             return null;
         }
     }
@@ -518,7 +485,7 @@ public class TypesExtractor {
                     ClassParser parser = new ClassParser();
                     DataInputStream in = getStream(path, args[0]);
                     if (in == null) return;
-                    ClassParser.ClassFile[] classInfo = parser.process(in);
+                    ClassParser.ClassFile[] classInfo = parser.process(in, path);
                     types = parser.getTypes(classInfo);
                 } else types = new String[0];
             }
@@ -528,7 +495,7 @@ public class TypesExtractor {
             //ReflectPrinter.printObject(file);
             //System.out.println(file.toString());
         } catch (ClassNotFoundException e) {
-            System.out.println("Class [" + args[0] + "] not found");
+            System.err.println("Class [" + args[0] + "] not found");
             System.exit(4);
         } catch (Exception e) {
             e.printStackTrace();

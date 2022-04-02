@@ -68,7 +68,6 @@ public class DependGraph {
                 }
                 String path = getPath(name);
                 if (path != null && printed.indexOf(path) == -1) {
-                    //if (path.indexOf('$') == -1) System.out.println("#" + path); // + " \\");
                     printed.addElement(path);
                 }
                 location = getClass().getClassLoader().getResource(resource).toExternalForm();
@@ -248,7 +247,6 @@ public class DependGraph {
             DependGraph depgraph = new DependGraph(pkgNames, deep);
             String location = null;
             for (; optind < args.length; optind++) {
-                //System.out.println("adding " + args[optind]);
                 depgraph.add(args[optind]);
             }
             System.out.println("}");

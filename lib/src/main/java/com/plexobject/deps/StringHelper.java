@@ -493,12 +493,6 @@ public class StringHelper {
                         ch = (char) lenchar[1];
                         buffer.append(ch);
                         i += len;
-/*
-            try {
-              System.out.println("StringHelper got symbol after & " + ch + ", len " + len + ", i " + i);
-              printBytes(toBytes16(String.valueOf(ch)), "symbol");
-            } catch (Exception e) {}
-*/
                     } else {
                         buffer.append(ch);
                     }
@@ -1134,97 +1128,8 @@ public class StringHelper {
             sb.append(hex);
         }
         return sb.toString();
-/*  
-    DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
-    StringBuffer sb = new StringBuffer();
-    try {
-      for (;;) {
-        sb.append(Integer.toHexString(in.readUnsignedByte()));
-      }
-    } catch (EOFException e) {
-    } catch (IOException e) {
-      e.printStackTrace(System.out);
-    }
-    return sb.toString();
-*/
     }
 
-/*
-public static void main(String args[]) {
-      if (args.length == 1) {
-          String stringToExamine = args[0];
-          //print each word in order
-          BreakIterator boundary = BreakIterator.getWordInstance();
-          boundary.setText(stringToExamine);
-          printEachForward(boundary, stringToExamine);
-          //print each sentence in reverse order
-          boundary = BreakIterator.getSentenceInstance(Locale.US);
-          boundary.setText(stringToExamine);
-          printEachBackward(boundary, stringToExamine);
-          printFirst(boundary, stringToExamine);
-          printLast(boundary, stringToExamine);
-      }
- }
- 
-Print each element in order 
- public static void printEachForward(BreakIterator boundary, String source) {
-     int start = boundary.first();
-     for (int end = boundary.next();
-          end != BreakIterator.DONE;
-          start = end, end = boundary.next()) {
-          System.out.println(source.substring(start,end));
-     }
- }
- 
-Print each element in reverse order 
- public static void printEachBackward(BreakIterator boundary, String source) {
-     int end = boundary.last();
-     for (int start = boundary.previous();
-          start != BreakIterator.DONE;
-          end = start, start = boundary.previous()) {
-         System.out.println(source.substring(start,end));
-     }
- }
- 
-Print first element 
- public static void printFirst(BreakIterator boundary, String source) {
-     int start = boundary.first();
-     int end = boundary.next();
-     System.out.println(source.substring(start,end));
- }
- 
-Print last element 
- public static void printLast(BreakIterator boundary, String source) {
-     int end = boundary.last();
-     int start = boundary.previous();
-     System.out.println(source.substring(start,end));
- }
- 
-Print the element at a specified position 
- public static void printAt(BreakIterator boundary, int pos, String source) {
-     int end = boundary.following(pos);
-     int start = boundary.previous();
-     System.out.println(source.substring(start,end));
- }
- 
-Find the next word 
- public static int nextWordStartAfter(int pos, String text) {
-     BreakIterator wb = BreakIterator.getWordInstance();
-     wb.setText(text);
-     int last = wb.following(pos);
-     int current = wb.next();
-     while (current != BreakIterator.DONE) {
-         for (int p = last; p < current; p++) {
-             if (Character.isLetter(text.charAt(p))
-                 return last;
-         }
-         last = current;
-         current = wb.next();
-     }
-     return BreakIterator.DONE;
- }
- 
-*/
 
     /**
      * Returns true if argument is either <code>null</code> or is full of
