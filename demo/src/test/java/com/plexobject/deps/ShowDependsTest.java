@@ -15,6 +15,6 @@ class ShowDependsTest {
     void testShowDepend() throws Exception {
         ShowDepend si = new ShowDepend(false, new String[]{"com.plexobject.demo"}, true);
         si.addClassDepend(GameServiceImpl.class.getName());
-        si.printDotSyntax(System.out);
+        si.printDotSyntax(System.out, "");
     }
 }

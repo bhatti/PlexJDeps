@@ -1,7 +1,10 @@
 package com.plexobject.deps;
 
+import com.plexobject.db.Dependency;
+
 import java.io.File;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.*;
 
 public abstract class BaseDepHelper {
@@ -34,6 +37,7 @@ public abstract class BaseDepHelper {
             "void"
     };
     boolean packageOnly;
+    boolean shortClass;
     String[] pkgNames;
     boolean checkSM = true;
     boolean verbose = false;
@@ -43,9 +47,17 @@ public abstract class BaseDepHelper {
     List skipList = new ArrayList();
     List mustList = new ArrayList();
 
-    public void printDotSyntax(PrintStream out) {
+    public void printDotSyntax(PrintStream out, String title) {
         Map duplicates = new HashMap();
         out.println("digraph G {");
+        out.println("  fontname=\"Helvetica,Arial,sans-serif\"");
+        out.println("  node [fontname=\"Helvetica,Arial,sans-serif\"]");
+        out.println("  edge [fontname=\"Helvetica,Arial,sans-serif\"]");
+        out.println("  labelloc=\"t\"");
+        out.println("  label=\"" + title + "\"");
+        out.println("  graph [splines=false]");
+        out.println("  node [shape=record style=filled fillcolor=gray95]");
+        out.println("  edge [arrowhead=vee style=dashed]");
         Iterator it = dependencies.keySet().iterator();
         Set visited = new HashSet();
         while (it.hasNext()) {
@@ -71,12 +83,35 @@ public abstract class BaseDepHelper {
         }
     }
 
+    String getDotClassFields(String t) {
+        try {
+            Class clazz = Class.forName(t);
+            Field[] fields = clazz.getDeclaredFields();
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < 2 && i < fields.length; i++) {
+                sb.append(" +" + fields[i].getName() + " <br align=\"left\"/>");
+            }
+            sb.append("...<br align=\"left\"/>");
+            return sb.toString();
+        } catch (Throwable e) {
+            return " +property <br align=\"left\"/>...<br align=\"left\"/>";
+        }
+    }
+
     void printDotSyntax(PrintStream out, Map duplicates, String key, String to) {
         if (acceptClass(to)) {
-            //String line = "  \"" + Dependency.getClassName(key) + "\"" + " -> " + "\"" + Dependency.getClassName(to) + "\"";
-            //String oline = "  \"" + Dependency.getClassName(to) + "\"" + " -> " + "\"" + Dependency.getClassName(key) + "\"";
-            String line = "  \"" + key + "\"" + " -> " + "\"" + to + "\"";
-            String oline = "  \"" + to + "\"" + " -> " + "\"" + key + "\"";
+            String dotKey = Dependency.getClassName(key);
+            String dotTo = Dependency.getClassName(to);
+            if (duplicates.get(key + "_node") == null) {
+                duplicates.put(key + "_node", Boolean.TRUE);
+                out.println("  " + dotKey + "[label = <{<b>«" + key + "»</b> | " + getDotClassFields(key) + "}>]");
+            }
+            if (duplicates.get(to + "_node") == null) {
+                duplicates.put(to + "_node", Boolean.TRUE);
+                out.println("  " + dotTo + "[label = <{<b>«" + to + "»</b> | " + getDotClassFields(to) + "}>]");
+            }
+            String line = "  \"" + dotKey + "\"" + " -> " + "\"" + dotTo + "\"";
+            String oline = "  \"" + dotTo + "\"" + " -> " + "\"" + dotKey + "\"";
             if (duplicates.get(line) == null) {
                 duplicates.put(line, Boolean.TRUE);
                 out.println(line);
@@ -135,6 +170,7 @@ public abstract class BaseDepHelper {
         if (visited.contains(klass)) {
             return;
         }
+        visited.add(klass);
         if (checkSM && System.getSecurityManager() != null) {
             if (verbose) System.err.println("# set security manager");
             checkSM = false;
@@ -148,7 +184,6 @@ public abstract class BaseDepHelper {
             return;
         }
         if (verbose) System.err.println("# adding " + klass);
-        visited.add(klass);
         String[] deps = getDepends(klass);
         for (String d : deps) {
             addClassDepend(d, visited);

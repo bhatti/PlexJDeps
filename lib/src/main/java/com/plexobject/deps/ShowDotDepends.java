@@ -102,7 +102,7 @@ public class ShowDotDepends extends BaseDepHelper {
                     File file = new File(filename);
                     if (verbose) System.err.println("# Writing " + file.getAbsolutePath());
                     PrintStream out = new PrintStream(new FileOutputStream(file));
-                    printDotSyntax(out);
+                    printDotSyntax(out, file.getName());
                     out.close();
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -165,7 +165,7 @@ public class ShowDotDepends extends BaseDepHelper {
                 else if (file.exists() && file.isFile()) si.addClassDepend(si.file2class(args[i]));
                 else si.addClassDepend(args[i]);
             }
-            if (filename == null) si.printDotSyntax(System.out);
+            if (filename == null) si.printDotSyntax(System.out, "");
             else si.printDotSyntax(filename);
             System.exit(0);
         } catch (Exception e) {

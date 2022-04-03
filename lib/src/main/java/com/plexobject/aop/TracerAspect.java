@@ -17,32 +17,33 @@ public class TracerAspect {
     @Around("callAt(wrap)")
     public Object around(ProceedingJoinPoint pjp,
                          Tracer wrap) throws Throwable {
+        Object result = pjp.proceed();
         if ("method-execution".equals(pjp.getKind())) {
-            Trace trace = new Trace(
-                    pjp.getSignature().toLongString(),
-                    pjp.getArgs(),
-                    getPackageStack(getPackage(pjp)));
-            TraceCollector.getInstance().add(trace);
+            TraceCollector.getInstance().add(getTrace(pjp, result));
         }
-        return pjp.proceed();
+        return result;
     }
 
     static String getPackage(ProceedingJoinPoint pjp) {
-        String[] toks = pjp.getSignature().getDeclaringTypeName().split(".");
+        String[] toks = pjp.getSignature().getDeclaringTypeName().split("\\.");
         if (toks.length >= 2) {
             return toks[0] + "." + toks[1];
         }
         return pjp.getSignature().getDeclaringTypeName();
     }
 
-    static List<String> getPackageStack(String pkg) {
+    static Trace getTrace(ProceedingJoinPoint pjp, Object result) {
+        String pkg = getPackage(pjp);
         final StackTraceElement[] threadStack = Thread.currentThread().getStackTrace();
-        List<String> pkgStack = new ArrayList<>();
-        for (int i = 0; i < threadStack.length; i++) {
-            if (threadStack[i].getClassName().startsWith(pkg)) {
-                pkgStack.add(threadStack[i].toString());
+        List<TraceMethod> methods = new ArrayList<>();
+        for (int i = threadStack.length - 1; i >= 0; i--) {
+            if (!threadStack[i].getClassName().startsWith("com.plexobject.aop") &&
+                    !threadStack[i].getMethodName().contains("_aroundBod") &&
+                    !threadStack[i].getClassName().contains("$AjcClosure") &&
+                    threadStack[i].getClassName().startsWith(pkg)) {
+                methods.add(new TraceMethod(threadStack[i]));
             }
         }
-        return pkgStack;
+        return new Trace(pjp.getSignature().toLongString(), pjp.getArgs(), result, methods);
     }
 }

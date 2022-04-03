@@ -9,6 +9,7 @@ public class CatalogAPI {
     GameServiceImpl gameService;
 
     public CatalogItem saveCatalog() {
-        return ctr.saveCatalog();
+        CatalogItem item = new CatalogItem(String.valueOf(System.currentTimeMillis()), "title1", "isbn");
+        return ctr.saveCatalog(item);
     }
 }

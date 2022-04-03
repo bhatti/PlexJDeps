@@ -1,6 +1,5 @@
 package com.plexobject.db;
 
-import com.sleepycat.je.DatabaseException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +21,7 @@ public class RepositoryFactory {
         this(new DatabaseStore(dbName, false), inMemory);
     }
 
-    public RepositoryFactory() throws DatabaseException {
+    public RepositoryFactory() {
         this(System.getProperty("user.home") + System.getProperty("file.separator") + ".deps", true);
     }
 
@@ -42,11 +41,11 @@ public class RepositoryFactory {
         return repository;
     }
 
-    public synchronized void closeDefault() throws DatabaseException {
+    public synchronized void closeDefault() {
         close(DEP_REPO);
     }
 
-    public synchronized void close(final String domain) throws DatabaseException {
+    public synchronized void close(final String domain) {
         repositories.remove(domain);
         databaseStore.close();
     }

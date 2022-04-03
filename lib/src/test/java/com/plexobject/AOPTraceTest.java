@@ -1,18 +1,42 @@
 package com.plexobject;
 
 import com.plexobject.aop.DynamicLoad;
+import com.plexobject.aop.TraceCollector;
 import com.plexobject.aop.Tracer;
 import com.plexobject.db.DatabaseStore;
 import com.plexobject.deps.ShowDepend;
 import com.plexobject.deps.ShowDepends;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class AOPTraceTest {
+    static void alice() {
+        bob("hello");
+    }
+
+    static String bob(String s) {
+        bib("hello");
+        return "success";
+    }
+
+    @Tracer
+    static String bib(String s) {
+        return "done";
+    }
+
     static class Demo {
         @Tracer
         public void runAopDemo() {
             System.out.println("inside runDemo");
         }
+    }
+
+    @AfterEach
+    void teardown() {
+        System.out.println("*** Traces ****");
+        TraceCollector.getInstance().dump();
     }
 
     @Test
@@ -23,17 +47,27 @@ public class AOPTraceTest {
     }
 
     @Test
-    void testShowDepend() throws Exception {
+    void testShowDepend() {
         ShowDepend si = new ShowDepend(true, new String[]{"com.demo"}, true);
         si.addClassDepend(DatabaseStore.class.getName());
-        si.printDotSyntax(System.out);
+        si.printDotSyntax(System.out, "");
     }
 
     @Test
-    void testAop() throws Exception {
+    void testAliceBob() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+        alice();
+        for (String sig : TraceCollector.getInstance().getSignatures()) {
+            System.out.println(TraceCollector.getInstance().buildSequenceConfig(sig));
+        }
+    }
+    @Test
+    void testShowSequence() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         DynamicLoad.checkAdviceClassLoaded();
         DynamicLoad.checkAspectJAgentLoaded();
         DynamicLoad.checkAdviceClassLoaded();
         new Demo().runAopDemo();
+        for (String sig : TraceCollector.getInstance().getSignatures()) {
+            System.out.println(TraceCollector.getInstance().buildSequenceConfig(sig));
+        }
     }
 }

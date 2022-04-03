@@ -9,6 +9,11 @@ public class MusicAPI {
     PlayerServiceImpl playerService;
 
     public MusicItems saveMusic() {
-        return ctr.saveMusic();
+        MusicItems items = new MusicItems();
+        items.setArtist("artist1" + System.currentTimeMillis());
+        items.setSongTitle("songTitle1");
+        items.setAlbumTitle("albumTitle1");
+        items.setAwards(11);
+        return ctr.saveMusic(items);
     }
 }

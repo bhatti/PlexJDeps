@@ -6,8 +6,8 @@ import com.plexobject.demo.ddb.model.MusicItems;
 public class MusicService {
     DDBMapper mapper = new DDBMapper();
 
-    public MusicItems saveMusic() {
-        return mapper.saveMusic();
+    public MusicItems saveMusic(MusicItems items) {
+        return mapper.updateMusic(items);
     }
 
 }

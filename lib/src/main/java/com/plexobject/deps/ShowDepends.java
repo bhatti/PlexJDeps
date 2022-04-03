@@ -31,8 +31,6 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class ShowDepends extends BaseDepHelper {
-    private static boolean verbose = false;
-    private boolean packageOnly;
     private boolean dotSyntax;
     private String filter;
     private boolean inMemory;
@@ -259,7 +257,7 @@ public class ShowDepends extends BaseDepHelper {
         File file = new File(filename);
         if (verbose) System.err.println("# Writing " + file.getAbsolutePath());
         PrintStream out = new PrintStream(new FileOutputStream(file));
-        printDotSyntax(out);
+        printDotSyntax(out, file.getName());
         out.close();
     }
 
@@ -308,17 +306,7 @@ public class ShowDepends extends BaseDepHelper {
 
     public static void main(String[] args) throws Exception {
         ShowDepends si = new ShowDepends();
-        if (System.getProperty(DISALLOWED_PACKAGES) != null) {
-            Vector list = new Vector();
-            StringTokenizer st = new StringTokenizer(System.getProperty(DISALLOWED_PACKAGES), ",");
-            while (st.hasMoreTokens()) {
-                list.addElement(st.nextToken().trim());
-            }
-            si.disallowedPackages = new String[list.size()];
-            list.copyInto(si.disallowedPackages);
-        } else {
-            si.disallowedPackages = SUN_PACKAGES;
-        }
+        si.disallowedPackages = getDisallowedPackages();
         boolean init = true;
 
         String filename = null;
@@ -351,18 +339,18 @@ public class ShowDepends extends BaseDepHelper {
                 init = false;
             } else if (args[i].equals("-v")) {
                 SpringParser.verbose = true;
-                verbose = true;
+                si.verbose = true;
             } else if (args[i].equals("-m")) {
                 si.inMemory = true;
             } else if (args[i].equals("-o")) {
                 filename = args[++i];
-                if (verbose) System.err.println("# will save output to " + filename);
+                if (si.verbose) System.err.println("# will save output to " + filename);
             } else if (args[i].equals("-s")) {
                 si.skipList.add(args[++i]);
-                if (verbose) System.err.println("# adding to skip list: " + args[i]);
+                if (si.verbose) System.err.println("# adding to skip list: " + args[i]);
             } else if (args[i].equals("-m")) {
                 si.mustList.add(args[++i]);
-                if (verbose) System.err.println("# adding to must list: " + args[i]);
+                if (si.verbose) System.err.println("# adding to must list: " + args[i]);
             } else if (args[i].endsWith(".jar") || args[i].endsWith(".zip")) si.addZipDepend(args[i]);
             else if (file.exists() && file.isDirectory()) {
                 si.addDirDepend(args[i]);

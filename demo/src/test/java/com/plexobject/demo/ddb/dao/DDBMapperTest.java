@@ -1,7 +1,6 @@
 package com.plexobject.demo.ddb.dao;
 
 import com.plexobject.aop.DynamicLoad;
-import com.plexobject.aop.Trace;
 import com.plexobject.aop.TraceCollector;
 import com.plexobject.demo.AOPDemo;
 import com.plexobject.demo.ddb.model.CatalogItem;
@@ -9,8 +8,6 @@ import com.plexobject.demo.ddb.model.MusicItems;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 public class DDBMapperTest {
     private final DDBMapper mapper = new DDBMapper();
@@ -24,11 +21,8 @@ public class DDBMapperTest {
 
     @AfterEach
     void teardown() {
-        for (List<Trace> traces : TraceCollector.getInstance().getAll().values()) {
-            for (Trace trace : traces) {
-                System.out.println(">>>>>>>>" + trace);
-            }
-        }
+        System.out.println("*** Traces ****");
+        TraceCollector.getInstance().dump();
     }
 
     @Test
@@ -55,7 +49,8 @@ public class DDBMapperTest {
 
     @Test
     void testUpdateCatalog() {
-        CatalogItem saved = mapper.saveCatalog();
+        CatalogItem item = new CatalogItem(String.valueOf(System.currentTimeMillis()), "title1", "isbn");
+        CatalogItem saved = mapper.saveCatalog(item);
         CatalogItem loaded = mapper.loadCatalog(saved.getId());
         System.out.println(loaded + "::::: " + mapper.countCatalog());
     }

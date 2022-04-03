@@ -6,7 +6,7 @@ import com.plexobject.demo.ddb.service.MusicService;
 public class MusicController {
     MusicService svc = new MusicService();
 
-    public MusicItems saveMusic() {
-        return svc.saveMusic();
+    public MusicItems saveMusic(MusicItems items) {
+        return svc.saveMusic(items);
     }
 }

@@ -6,7 +6,7 @@ import com.plexobject.demo.ddb.service.CatalogService;
 public class CatalogController {
     CatalogService svc = new CatalogService();
 
-    public CatalogItem saveCatalog() {
-        return svc.saveCatalog();
+    public CatalogItem saveCatalog(CatalogItem item) {
+        return svc.saveCatalog(item);
     }
 }

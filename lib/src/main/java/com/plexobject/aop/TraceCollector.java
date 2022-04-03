@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TraceCollector {
     private static final TraceCollector INSTANCE = new TraceCollector();
 
-    private ConcurrentHashMap<String, List<Trace>> traces = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, Boolean> locks = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, List<Trace>> traces = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Boolean> locks = new ConcurrentHashMap<>();
 
     public static TraceCollector getInstance() {
         return INSTANCE;
@@ -33,6 +33,18 @@ public class TraceCollector {
         }
     }
 
+    public void dump() {
+        for (List<Trace> traces : getAll().values()) {
+            for (Trace trace : traces) {
+                System.out.println(trace.getSignature() + " -- " + Arrays.toString(trace.getArgs()));
+            }
+        }
+    }
+
+    public Set<String> getSignatures() {
+        return new HashSet<>(traces.keySet());
+    }
+
     public Map<String, List<Trace>> getAll() {
         Map<String, List<Trace>> result = new HashMap<>();
         for (String signature : new ArrayList<>(traces.keySet())) {
@@ -40,6 +52,7 @@ public class TraceCollector {
         }
         return result;
     }
+
 
     public int size() {
         return traces.size();

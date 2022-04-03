@@ -61,18 +61,21 @@ public class DDBMapper {
     @Tracer
     public MusicItems saveMusic() {
         MusicItems items = new MusicItems();
-        // Add new content to the Music table
         items.setArtist("artist1" + System.currentTimeMillis());
         items.setSongTitle("songTitle1");
         items.setAlbumTitle("albumTitle1");
         items.setAwards(11);
-        mapper.save(items);
+        updateMusic(items);
         return items;
     }
 
     @Tracer
     public MusicItems updateMusic(MusicItems items) {
-        mapper.save(items);
+        try {
+            mapper.save(items);
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
         return items;
     }
 
@@ -150,9 +153,12 @@ public class DDBMapper {
     }
 
     @Tracer
-    public CatalogItem saveCatalog() {
-        CatalogItem item = new CatalogItem(String.valueOf(System.currentTimeMillis()), "title1", "isbn");
-        mapper.save(item);
+    public CatalogItem saveCatalog(CatalogItem item) {
+        try {
+            mapper.save(item);
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
         return item;
     }
 
