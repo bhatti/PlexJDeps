@@ -200,6 +200,9 @@ public class ShowDepends extends BaseDepHelper {
                 si.search(d);
             }
         }
+        if (!si.processed.isEmpty()) {
+            sequenceDigrams(si.processed.get(0), args);
+        }
     }
 }
 

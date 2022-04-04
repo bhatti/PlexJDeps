@@ -5,10 +5,18 @@ import org.junit.jupiter.api.Test;
 
 class ShowDependsTest {
     @Test
-    void testShowDepends() throws Exception {
+    void testSearch() throws Exception {
         ShowDepends si = new ShowDepends(false, new String[]{"com.plexobject.demo"}, true);
         si.addJaxClasses();
         si.search(GameServiceImpl.class.getName());
+    }
+
+    @Test
+    void testShowDepends() throws Exception {
+        ShowDepends si = new ShowDepends(false, new String[]{"com.plexobject.demo"}, true);
+        si.addJaxClasses();
+        si.addClassDepend(GameServiceImpl.class.getName());
+        si.printDotSyntax(System.out, "");
     }
 
     @Test

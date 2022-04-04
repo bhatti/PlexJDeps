@@ -128,7 +128,9 @@ public class ShowDotDepends extends BaseDepHelper {
             }
             if (filename == null) si.printDotSyntax(System.out, "");
             else si.printDotSyntax(filename);
-            System.exit(0);
+            if (!si.processed.isEmpty()) {
+                sequenceDigrams(si.processed.get(0), args);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

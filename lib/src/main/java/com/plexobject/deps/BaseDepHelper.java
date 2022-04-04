@@ -1,14 +1,19 @@
 package com.plexobject.deps;
 
+import com.plexobject.aop.Trace;
+import com.plexobject.aop.TraceCollector;
 import com.plexobject.db.DatabaseStore;
 import com.plexobject.db.Dependency;
 import com.plexobject.db.DependencyRepository;
 import com.plexobject.db.RepositoryFactory;
+import com.plexobject.graph.UMLDiagrams;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.*;
@@ -246,15 +251,10 @@ public abstract class BaseDepHelper {
     }
 
     public void addClassDepend(String klass) {
-        Set visited = new HashSet();
-        addClassDepend(klass, visited);
-    }
-
-    public void addClassDepend(String klass, Set visited) {
-        if (visited.contains(klass)) {
+        if (processed.contains(klass)) {
             return;
         }
-        visited.add(klass);
+        processed.add(klass);
         if (checkSM && System.getSecurityManager() != null) {
             if (verbose) System.err.println("# set security manager");
             checkSM = false;
@@ -270,7 +270,7 @@ public abstract class BaseDepHelper {
         if (verbose) System.err.println("# adding " + klass);
         String[] deps = getDepends(klass);
         for (String d : deps) {
-            addClassDepend(d, visited);
+            addClassDepend(d);
         }
         if (packageOnly) {
             klass = klass.substring(0, klass.lastIndexOf('.'));
@@ -461,4 +461,22 @@ public abstract class BaseDepHelper {
         return false;
     }
 
+    static void sequenceDigrams(String main, String[] args) {
+        try {
+            Class clazz = Class.forName(main);
+            Method m = clazz.getDeclaredMethod("main", String[].class);
+            m.invoke(null, args);
+            for (List<Trace> traces : TraceCollector.getInstance().getAll().values()) {
+                for (Trace trace : traces) {
+                    System.out.println(trace.buildSequenceConfig());
+                    ByteArrayOutputStream out = new UMLDiagrams().createSequence(trace.buildSequenceConfig());
+                    FileOutputStream png = new FileOutputStream(trace.getMethods().get(0) + ".png");
+                    png.write(out.toByteArray());
+                    png.close();
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
 }

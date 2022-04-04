@@ -19,11 +19,15 @@
 
 package com.plexobject.deps;
 
+import com.plexobject.aop.Trace;
+import com.plexobject.aop.TraceCollector;
+import com.plexobject.graph.UMLDiagrams;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.io.FileOutputStream;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class ShowDepend extends BaseDepHelper {
     public ShowDepend() {
@@ -128,6 +132,9 @@ public class ShowDepend extends BaseDepHelper {
             }
             if (filename == null) si.printDotSyntax(System.out, "");
             else si.printDotSyntax(filename);
+            if (!si.processed.isEmpty()) {
+                sequenceDigrams(si.processed.get(0), args);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
