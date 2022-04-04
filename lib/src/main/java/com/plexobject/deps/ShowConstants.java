@@ -29,7 +29,7 @@ public class ShowConstants {
                 else filepath = TypesExtractor.getPath(args[i]);
                 if (filepath == null) return;
                 ClassParser parser = new ClassParser();
-                ClassParser.ClassFile[] classInfo = parser.process(filepath);
+                ClassParser.ClassFile[] classInfo = parser.process(filepath, null);
                 String[] consts = parser.getConstants(classInfo);
                 for (int j = 0; j < consts.length; j++) {
                     System.out.println(consts[j]);

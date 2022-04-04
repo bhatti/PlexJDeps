@@ -1,6 +1,7 @@
 package com.plexobject;
 
 import com.plexobject.aop.DynamicLoad;
+import com.plexobject.aop.Trace;
 import com.plexobject.aop.TraceCollector;
 import com.plexobject.aop.Tracer;
 import com.plexobject.db.DatabaseStore;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 public class AOPTraceTest {
     static void alice() {
@@ -56,8 +58,10 @@ public class AOPTraceTest {
     @Test
     void testAliceBob() throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         alice();
-        for (String sig : TraceCollector.getInstance().getSignatures()) {
-            System.out.println(TraceCollector.getInstance().buildSequenceConfig(sig));
+        for (List<Trace> traces : TraceCollector.getInstance().getAll().values()) {
+            for (Trace trace : traces) {
+                System.out.println(trace.buildSequenceConfig());
+            }
         }
     }
     @Test
@@ -66,8 +70,10 @@ public class AOPTraceTest {
         DynamicLoad.checkAspectJAgentLoaded();
         DynamicLoad.checkAdviceClassLoaded();
         new Demo().runAopDemo();
-        for (String sig : TraceCollector.getInstance().getSignatures()) {
-            System.out.println(TraceCollector.getInstance().buildSequenceConfig(sig));
+        for (List<Trace> traces : TraceCollector.getInstance().getAll().values()) {
+            for (Trace trace : traces) {
+                System.out.println(trace.buildSequenceConfig());
+            }
         }
     }
 }

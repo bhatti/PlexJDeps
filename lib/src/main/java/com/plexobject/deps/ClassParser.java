@@ -173,12 +173,12 @@ public class ClassParser {
     public ClassParser() {
     }
 
-    public ClassFile[] process(String filename)
+    public ClassFile[] process(String filename, TypeFilter filter)
             throws java.io.IOException, ClassFormatError {
-        return process(getStream(filename), filename);
+        return process(getStream(filename), filename, filter);
     }
 
-    public ClassFile[] process(DataInputStream in, String filename)
+    public ClassFile[] process(DataInputStream in, String filename, TypeFilter filter)
             throws java.io.IOException, ClassFormatError {
         Vector vecClassFiles = new Vector();
         ClassFile cf = new ClassFile(in, filename);
@@ -186,11 +186,14 @@ public class ClassParser {
         String type = getClassName(cf.constant_pool, cf.this_class);
         String[] innerClasses = cf.getInnerClasses(type.replace('/', '.'));
         for (int i = 0; i < innerClasses.length; i++) {
+            if (filter != null && !filter.accept(innerClasses[i])) {
+                continue;
+            }
             String path = TypesExtractor.getPath(innerClasses[i]);
             if (path == null) continue;
             in = getStream(path, innerClasses[i]);
             if (in == null) return new ClassFile[0];
-            ClassFile[] arrcf = process(in, path);
+            ClassFile[] arrcf = process(in, path, filter);
             for (int j = 0; j < arrcf.length; j++) {
                 if (vecClassFiles.indexOf(arrcf[j]) == -1)
                     vecClassFiles.addElement(arrcf[j]);
@@ -2189,7 +2192,7 @@ public class ClassParser {
             if (filepath == null) return;
 
             ClassParser parser = new ClassParser();
-            ClassParser.ClassFile[] classInfo = parser.process(filepath);
+            ClassParser.ClassFile[] classInfo = parser.process(filepath, null);
             String[] types = parser.getTypes(classInfo);
             for (int i = 0; i < types.length; i++) {
                 System.out.println(types[i]);

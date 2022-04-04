@@ -49,7 +49,7 @@ public class ShowImports extends BaseDepHelper {
             }
 
             Vector extracted = new Vector();
-            TypesExtractor.extractTypesUsingJavap(type, extracted);
+            TypesExtractor.extractTypesUsingJavap(type, extracted, type1 -> acceptClass(type1));
             Enumeration it = extracted.elements();
             while (it.hasMoreElements()) {
                 String extype = (String) it.nextElement();

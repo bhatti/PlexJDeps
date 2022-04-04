@@ -416,7 +416,7 @@ public abstract class BaseDepHelper {
         return name;
     }
 
-    public static String[] getDisallowedPackages() {
+    static String[] getDisallowedPackages() {
         if (System.getProperty(BaseDepHelper.DISALLOWED_PACKAGES) != null) {
             Vector list = new Vector();
             StringTokenizer st = new StringTokenizer(

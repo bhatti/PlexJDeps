@@ -71,9 +71,9 @@ public class TypesExtractor {
         return types;
     }
 
-    public static String[] extractTypesUsingClassInfo(Class type) {
+    public static String[] extractTypesUsingClassInfo(Class type, TypeFilter filter) {
         Vector extracted = new Vector();
-        extractTypesUsingClassInfo(type, extracted);
+        extractTypesUsingClassInfo(type, extracted, filter);
         String[] types = new String[extracted.size()];
         extracted.copyInto(types);
         return types;
@@ -105,7 +105,7 @@ public class TypesExtractor {
         return in;
     }
 
-    public static void extractTypesUsingClassInfo(Class type, Vector extracted) {
+    public static void extractTypesUsingClassInfo(Class type, Vector extracted, TypeFilter filter) {
         String path = getPath(type.getName());
         if (path != null) {
             try {
@@ -119,7 +119,7 @@ public class TypesExtractor {
                 }
                 if (in == null) return;
                 ClassParser parser = new ClassParser();
-                ClassParser.ClassFile[] classInfo = parser.process(in, path);
+                ClassParser.ClassFile[] classInfo = parser.process(in, path, filter);
                 String[] types = ClassParser.getTypes(classInfo);
                 for (int i = 0; i < types.length; i++) {
                     if (extracted.indexOf(types[i]) == -1) extracted.addElement(types[i]);
@@ -250,17 +250,17 @@ public class TypesExtractor {
         }
     }
 
-    public static String[] extractTypesUsingJavap(Class type) {
+    public static String[] extractTypesUsingJavap(Class type, TypeFilter filter) {
         Vector extracted = new Vector();
-        extractTypesUsingJavap(type, extracted);
+        extractTypesUsingJavap(type, extracted, filter);
         String[] types = new String[extracted.size()];
         extracted.copyInto(types);
         return types;
     }
 
-    public static void extractTypesUsingJavap(Class type, Vector extracted) {
+    public static void extractTypesUsingJavap(Class type, Vector extracted, TypeFilter filter) {
         if (!javap) {
-            extractTypesUsingClassInfo(type, extracted);
+            extractTypesUsingClassInfo(type, extracted, filter);
             return;
         }
         // Use javap disassemble to get all classes
@@ -405,7 +405,7 @@ public class TypesExtractor {
     }
 
 
-    public static String getPath(String typename) {
+    static String getPath(String typename) {
         //String resource = typename.replace('.', separator).concat(".class");
         String resource = typename.replace('.', '/').concat(".class");
         java.net.URL url = TypesExtractor.class.getClassLoader().getResource(resource);
@@ -436,7 +436,7 @@ public class TypesExtractor {
                 int end = location.indexOf('!');
                 return location.substring(start + 1, end);
             }
-            System.err.println("Failed to find resource '" + resource + "' at [" + location + "] url [" + url + "]");
+            //System.err.println("Failed to find resource '" + resource + "' at [" + location + "] url [" + url + "]");
             return null;
         }
         //System.out.println("******* location " + location);
@@ -478,14 +478,14 @@ public class TypesExtractor {
             Class clazz = Class.forName(args[0]);
 
             String[] types = null;
-            if (javap) types = extractTypesUsingJavap(clazz);
+            if (javap) types = extractTypesUsingJavap(clazz, null);
             else {
                 String path = getPath(args[0]);
                 if (path != null) {
                     ClassParser parser = new ClassParser();
                     DataInputStream in = getStream(path, args[0]);
                     if (in == null) return;
-                    ClassParser.ClassFile[] classInfo = parser.process(in, path);
+                    ClassParser.ClassFile[] classInfo = parser.process(in, path, null);
                     types = parser.getTypes(classInfo);
                 } else types = new String[0];
             }
