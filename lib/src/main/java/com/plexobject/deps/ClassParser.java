@@ -235,12 +235,7 @@ public class ClassParser {
             interfaces_count = in.readUnsignedShort();
             interfaces = new int[interfaces_count];
             for (int i = 0; i < interfaces_count; i++) {
-                try {
-                    interfaces[i] = in.readUnsignedShort();
-                } catch (EOFException e) {
-                    System.err.println("Failed to read interface " + i + "/" + interfaces.length + " " + filename);
-                    break;
-                }
+                interfaces[i] = in.readUnsignedShort();
             }
             fields_count = in.readUnsignedShort();
             fields = new field_info[fields_count];
@@ -480,6 +475,7 @@ public class ClassParser {
         public static final byte CONSTANT_Double = 6;
         public static final byte CONSTANT_NameAndType = 12;
         public static final byte CONSTANT_MethodHandle = 15;
+        public static final byte CONSTANT_MethodType = 16;
         public static final byte CONSTANT_InvokeDynamic = 18;
         public static final byte CONSTANT_Utf8 = 1;
 
@@ -525,6 +521,9 @@ public class ClassParser {
                     break;
                 case CONSTANT_MethodHandle:
                     info = new ClassParser.CONSTANT_MethodHandle_Info(in);
+                    break;
+                case CONSTANT_MethodType:
+                    info = new ClassParser.CONSTANT_MethodType_Info(in);
                     break;
                 case CONSTANT_InvokeDynamic:
                     info = new ClassParser.CONSTANT_InvokeDynamic_Info(in);
@@ -1683,6 +1682,19 @@ public class ClassParser {
         }
     }
 
+    public class CONSTANT_MethodType_Info {
+        public int descriptor_index;
+
+        public CONSTANT_MethodType_Info(DataInputStream in) throws IOException {
+            BytecodeParser p = new BytecodeParser(in);
+            descriptor_index = p.u2();
+        }
+
+        public String toString() {
+            return "MethodTypeInfo: " + descriptor_index;
+        }
+    }
+
     public class CONSTANT_InvokeDynamic_Info {
         public int method_attr_index;
         public int name_and_type_index;
@@ -2146,13 +2158,6 @@ public class ClassParser {
         if (debug) {
             if (types == null || types.length == 0) {
                 System.err.println("****** failed (" + value + ")");
-/*
-        try {
-          throw new Exception("value [" + value + "] failed");
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-*/
             } else {
                 System.err.print("****** succeeded (" + value + ")");
                 for (int i = 0; types != null && i < types.length; i++) {

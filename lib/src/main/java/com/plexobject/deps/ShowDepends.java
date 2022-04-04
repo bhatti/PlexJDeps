@@ -19,26 +19,10 @@
 
 package com.plexobject.deps;
 
-import com.plexobject.db.DatabaseStore;
-import com.plexobject.db.Dependency;
-import com.plexobject.db.DependencyRepository;
-import com.plexobject.db.RepositoryFactory;
-
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.util.*;
 
 public class ShowDepends extends BaseDepHelper {
-    private boolean dotSyntax;
-    private String filter;
-    private boolean inMemory;
-    private SpringParser springParser = new SpringParser();
-    private JaxParser jaxParser = new JaxParser();
-    private List<String> processed = new ArrayList<>();
-
-    //
     public ShowDepends() {
     }
 
@@ -47,17 +31,6 @@ public class ShowDepends extends BaseDepHelper {
         this.pkgNames = pkgNames;
         this.springParser.pkgNames = pkgNames;
         this.dotSyntax = dotSyntax;
-    }
-
-    public void addSpringClasses() {
-        springParser.addAllSpringFiles();
-        for (String klass : springParser.classToInfos.keySet()) {
-            addClassDepend(klass);
-        }
-    }
-
-    public void addJaxClasses() {
-        jaxParser.addAllJaxFiles();
     }
 
     //
@@ -116,149 +89,6 @@ public class ShowDepends extends BaseDepHelper {
         }
         Arrays.sort(imports);
         return imports;
-    }
-
-    public void saveDependencies() throws Exception {
-        Map duplicates = new HashMap();
-        Iterator it = dependencies.keySet().iterator();
-        DatabaseStore store = new DatabaseStore();
-        RepositoryFactory factory = new RepositoryFactory(store, inMemory);
-        DependencyRepository repo = factory.getDependencyRepository();
-        repo.clear();
-        while (it.hasNext()) {
-            String key = (String) it.next();
-            String[] depend = (String[]) dependencies.get(key);
-            for (int i = 0; depend != null && i < depend.length; i++) {
-                if (acceptClass(depend[i])) {
-                    String line = "  \"" + key + "\"" + " -> " + "\"" + depend[i] + "\"";
-                    if (duplicates.get(line) == null) {
-                        duplicates.put(line, Boolean.TRUE);
-                        Dependency dep = new Dependency(key, depend[i]);
-                        BeanInfo info = springParser.classToInfos.get(key);
-                        if (info != null) {
-                            for (BeanInfo child : info.children) {
-                                if (child.className.equals(depend[i])) {
-                                    dep.setSpringDI(true);
-                                    break;
-                                }
-                            }
-                        }
-                        //System.out.println("Saving " + line);System.out.flush();
-                        repo.save(dep);
-                    }
-                }
-            }
-        }
-        Set<Dependency> all = repo.getAll();
-        System.err.println("Saved " + all.size() + " dependencies");
-        repo.close();
-        store.close();
-    }
-
-    private static String getLastPart(String name) {
-        String[] tnames = name.split("\\.");
-        return tnames[tnames.length - 1];
-    }
-
-    public void search(String name) throws Exception {
-        Set<String> duplicates = new HashSet<>();
-        RepositoryFactory factory = new RepositoryFactory();
-        DependencyRepository repo = factory.getDependencyRepository();
-        Set<Dependency> from = repo.getDependenciesFrom(name);
-        Set<Dependency> to = repo.getDependenciesTo(name);
-        // 
-        if (dotSyntax) {
-            System.out.println("digraph G {");
-            System.out.println("\"" + getLastPart(name) + "\" [shape=polygon, sides=5, peripheries=3, color=purple, style=filled];");
-        }
-        if (from.size() > 0) {
-            if (!dotSyntax) {
-                System.err.println(name + " depends on:");
-            }
-            for (Dependency d : from) {
-                if (filter == null || d.to.contains(filter)) {
-                    String url = jaxParser.classToUrl.get(d.to);
-                    String suffix = url != null ? ", service endpoint " + url : "";
-                    if (dotSyntax) {
-                        System.out.println("\"" + getLastPart(name) + "\" -> \"" + getLastPart(d.to) + "\" [shape = box];");
-                    } else {
-                        System.out.println("\t" + d.to + suffix);
-                    }
-                }
-            }
-        }
-        if (to.size() > 0) {
-            if (!dotSyntax) {
-                System.out.println(name + " depended by:");
-            }
-            for (Dependency d : to) {
-                if (filter == null || d.from.contains(filter)) {
-                    String url = jaxParser.classToUrl.get(d.from);
-                    if (dotSyntax) {
-                        String suffix = url != null ? ", label=\"URI:" + url + "\"" : "";
-                        System.out.println("\"" + getLastPart(d.from) + "\" -> \"" + getLastPart(name) + "\" [shape = circle" + suffix + "];");
-                    } else {
-                        String suffix = url != null ? ", URI=" + url : "";
-                        System.out.println("\t" + d.from + suffix);
-                    }
-                }
-            }
-
-            //
-            Set<Dependency> indirect = new HashSet<>();
-            for (Dependency d : to) {
-                if (!duplicates.contains(d.from)) {
-                    indirectDeps(d.from, indirect, repo, duplicates);
-                }
-            }
-            if (indirect.size() > 0) {
-                if (!dotSyntax) {
-                    System.out.println(name + " indirectly depended by:");
-                }
-                for (Dependency d : indirect) {
-                    if (filter == null || d.from.contains(filter)) {
-                        String url = jaxParser.classToUrl.get(d.from);
-                        if (dotSyntax) {
-                            String suffix = url != null ? ", label=\"URI:" + url + "\"" : "";
-                            if (name.equals(d.from) || name.equals(d.to)) {
-                                System.out.println("\"" + getLastPart(d.from) + "\" -> \"" + getLastPart(d.to) + "\" [shape = circle" + suffix + "];");
-                            } else {
-                                System.out.println("\"" + getLastPart(d.from) + "\" -> \"" + getLastPart(d.to) + "\" [shape = invtriangle, style=dotted" + suffix + "];");
-                            }
-                        } else {
-                            String suffix = url != null ? ", URI=" + url : "";
-                            System.out.println("\t" + d.from + suffix);
-                        }
-                    }
-                }
-            }
-        }
-        if (dotSyntax) {
-            System.out.println("}");
-        }
-        repo.close();
-    }
-
-    private void indirectDeps(String name, Set<Dependency> indirect, DependencyRepository repo, Set<String> duplicates) throws Exception {
-        if (duplicates.contains(name)) {
-            return;
-        }
-        duplicates.add(name);
-        Set<Dependency> to = repo.getDependenciesTo(name);
-        for (Dependency d : to) {
-            if (!duplicates.contains(d.from)) {
-                indirect.add(d);
-                indirectDeps(d.from, indirect, repo, duplicates);
-            }
-        }
-    }
-
-    private void printDotSyntax(final String filename) throws IOException {
-        File file = new File(filename);
-        if (verbose) System.err.println("# Writing " + file.getAbsolutePath());
-        PrintStream out = new PrintStream(new FileOutputStream(file));
-        printDotSyntax(out, file.getName());
-        out.close();
     }
 
     public void addClassDepend(String klass) {

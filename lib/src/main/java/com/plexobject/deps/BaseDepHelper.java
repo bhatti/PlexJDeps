@@ -1,10 +1,16 @@
 package com.plexobject.deps;
 
+import com.plexobject.db.DatabaseStore;
 import com.plexobject.db.Dependency;
+import com.plexobject.db.DependencyRepository;
+import com.plexobject.db.RepositoryFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.*;
 
 public abstract class BaseDepHelper {
@@ -37,15 +43,39 @@ public abstract class BaseDepHelper {
             "void"
     };
     boolean packageOnly;
-    boolean shortClass;
     String[] pkgNames;
     boolean checkSM = true;
     boolean verbose = false;
+    boolean inMemory;
+    boolean dotSyntax;
+    String filter;
 
     String[] disallowedPackages = BaseDepHelper.SUN_PACKAGES;
-    Map dependencies = new HashMap();
-    List skipList = new ArrayList();
-    List mustList = new ArrayList();
+    final Map dependencies = new HashMap();
+    final List skipList = new ArrayList();
+    final List mustList = new ArrayList();
+    final List<String> processed = new ArrayList<>();
+    final SpringParser springParser = new SpringParser();
+    final JaxParser jaxParser = new JaxParser();
+
+
+    public void printDotSyntax(final String filename) {
+        PrivilegedAction action = new PrivilegedAction() {
+            public Object run() {
+                try {
+                    File file = new File(filename);
+                    if (verbose) System.err.println("# Writing " + file.getAbsolutePath());
+                    PrintStream out = new PrintStream(new FileOutputStream(file));
+                    printDotSyntax(out, file.getName());
+                    out.close();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+        AccessController.doPrivileged(action);
+    }
 
     public void printDotSyntax(PrintStream out, String title) {
         Map duplicates = new HashMap();
@@ -83,21 +113,6 @@ public abstract class BaseDepHelper {
         }
     }
 
-    String getDotClassFields(String t) {
-        try {
-            Class clazz = Class.forName(t);
-            Field[] fields = clazz.getDeclaredFields();
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < 2 && i < fields.length; i++) {
-                sb.append(" +" + fields[i].getName() + " <br align=\"left\"/>");
-            }
-            sb.append("...<br align=\"left\"/>");
-            return sb.toString();
-        } catch (Throwable e) {
-            return " +property <br align=\"left\"/>...<br align=\"left\"/>";
-        }
-    }
-
     void printDotSyntax(PrintStream out, Map duplicates, String key, String to) {
         if (acceptClass(to)) {
             String dotKey = Dependency.getClassName(key);
@@ -120,6 +135,48 @@ public abstract class BaseDepHelper {
                 }
             }
         }
+    }
+
+    public void saveDependencies() {
+        Map duplicates = new HashMap();
+        Iterator it = dependencies.keySet().iterator();
+        DatabaseStore store = new DatabaseStore();
+        RepositoryFactory factory = new RepositoryFactory(store, inMemory);
+        DependencyRepository repo = factory.getDependencyRepository();
+        repo.clear();
+        while (it.hasNext()) {
+            String key = (String) it.next();
+            String[] depend = (String[]) dependencies.get(key);
+            for (int i = 0; depend != null && i < depend.length; i++) {
+                if (acceptClass(depend[i])) {
+                    String line = "  \"" + key + "\"" + " -> " + "\"" + depend[i] + "\"";
+                    if (duplicates.get(line) == null) {
+                        duplicates.put(line, Boolean.TRUE);
+                        Dependency dep = new Dependency(key, depend[i]);
+                        BeanInfo info = springParser.classToInfos.get(key);
+                        if (info != null) {
+                            for (BeanInfo child : info.children) {
+                                if (child.className.equals(depend[i])) {
+                                    dep.setSpringDI(true);
+                                    break;
+                                }
+                            }
+                        }
+                        //System.out.println("Saving " + line);System.out.flush();
+                        repo.save(dep);
+                    }
+                }
+            }
+        }
+        Set<Dependency> all = repo.getAll();
+        System.err.println("Saved " + all.size() + " dependencies");
+        repo.close();
+        store.close();
+    }
+
+    static String getLastPart(String name) {
+        String[] tnames = name.split("\\.");
+        return tnames[tnames.length - 1];
     }
 
     boolean acceptClass(String name) {
@@ -161,6 +218,17 @@ public abstract class BaseDepHelper {
         return true;
     }
 
+    public void addSpringClasses() {
+        springParser.addAllSpringFiles();
+        for (String klass : springParser.classToInfos.keySet()) {
+            addClassDepend(klass);
+        }
+    }
+
+    public void addJaxClasses() {
+        jaxParser.addAllJaxFiles();
+    }
+
     public void addClassDepend(String klass) {
         Set visited = new HashSet();
         addClassDepend(klass, visited);
@@ -195,6 +263,115 @@ public abstract class BaseDepHelper {
             }
         }
         dependencies.put(klass, deps);
+    }
+
+    public void search(String name) throws Exception {
+        Set<String> duplicates = new HashSet<>();
+        RepositoryFactory factory = new RepositoryFactory();
+        DependencyRepository repo = factory.getDependencyRepository();
+        Set<Dependency> from = repo.getDependenciesFrom(name);
+        Set<Dependency> to = repo.getDependenciesTo(name);
+        //
+        if (dotSyntax) {
+            System.out.println("digraph G {");
+            System.out.println("\"" + getLastPart(name) + "\" [shape=polygon, sides=5, peripheries=3, color=purple, style=filled];");
+        }
+        if (from.size() > 0) {
+            if (!dotSyntax) {
+                System.err.println(name + " depends on:");
+            }
+            for (Dependency d : from) {
+                if (filter == null || d.to.contains(filter)) {
+                    String url = jaxParser.classToUrl.get(d.to);
+                    String suffix = url != null ? ", service endpoint " + url : "";
+                    if (dotSyntax) {
+                        System.out.println("\"" + getLastPart(name) + "\" -> \"" + getLastPart(d.to) + "\" [shape = box];");
+                    } else {
+                        System.out.println("\t" + d.to + suffix);
+                    }
+                }
+            }
+        }
+        if (to.size() > 0) {
+            if (!dotSyntax) {
+                System.out.println(name + " depended by:");
+            }
+            for (Dependency d : to) {
+                if (filter == null || d.from.contains(filter)) {
+                    String url = jaxParser.classToUrl.get(d.from);
+                    if (dotSyntax) {
+                        String suffix = url != null ? ", label=\"URI:" + url + "\"" : "";
+                        System.out.println("\"" + getLastPart(d.from) + "\" -> \"" + getLastPart(name) + "\" [shape = circle" + suffix + "];");
+                    } else {
+                        String suffix = url != null ? ", URI=" + url : "";
+                        System.out.println("\t" + d.from + suffix);
+                    }
+                }
+            }
+
+            //
+            Set<Dependency> indirect = new HashSet<>();
+            for (Dependency d : to) {
+                if (!duplicates.contains(d.from)) {
+                    indirectDeps(d.from, indirect, repo, duplicates);
+                }
+            }
+            if (indirect.size() > 0) {
+                if (!dotSyntax) {
+                    System.out.println(name + " indirectly depended by:");
+                }
+                for (Dependency d : indirect) {
+                    if (filter == null || d.from.contains(filter)) {
+                        String url = jaxParser.classToUrl.get(d.from);
+                        if (dotSyntax) {
+                            String suffix = url != null ? ", label=\"URI:" + url + "\"" : "";
+                            if (name.equals(d.from) || name.equals(d.to)) {
+                                System.out.println("\"" + getLastPart(d.from) + "\" -> \"" + getLastPart(d.to) + "\" [shape = circle" + suffix + "];");
+                            } else {
+                                System.out.println("\"" + getLastPart(d.from) + "\" -> \"" + getLastPart(d.to) + "\" [shape = invtriangle, style=dotted" + suffix + "];");
+                            }
+                        } else {
+                            String suffix = url != null ? ", URI=" + url : "";
+                            System.out.println("\t" + d.from + suffix);
+                        }
+                    }
+                }
+            }
+        }
+        if (dotSyntax) {
+            System.out.println("}");
+        }
+        repo.close();
+    }
+
+    private void indirectDeps(String name, Set<Dependency> indirect, DependencyRepository repo, Set<String> duplicates) throws Exception {
+        if (duplicates.contains(name)) {
+            return;
+        }
+        duplicates.add(name);
+        Set<Dependency> to = repo.getDependenciesTo(name);
+        for (Dependency d : to) {
+            if (!duplicates.contains(d.from)) {
+                indirect.add(d);
+                indirectDeps(d.from, indirect, repo, duplicates);
+            }
+        }
+    }
+
+
+    String getDotClassFields(String t) {
+        try {
+            Class clazz = Class.forName(t);
+            Field[] fields = clazz.getDeclaredFields();
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < 2 && i < fields.length; i++) {
+                sb.append(" +" + fields[i].getName() + " <br align=\"left\"/>");
+            }
+            sb.append("...<br align=\"left\"/>");
+            return sb.toString();
+        } catch (Throwable e) {
+            return " +property <br align=\"left\"/>...<br align=\"left\"/>";
+        }
     }
 
 

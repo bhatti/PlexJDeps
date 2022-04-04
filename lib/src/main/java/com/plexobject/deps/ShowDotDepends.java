@@ -20,10 +20,6 @@
 package com.plexobject.deps;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -95,41 +91,10 @@ public class ShowDotDepends extends BaseDepHelper {
         return imports;
     }
 
-    private void printDotSyntax(final String filename) {
-        PrivilegedAction action = new PrivilegedAction() {
-            public Object run() {
-                try {
-                    File file = new File(filename);
-                    if (verbose) System.err.println("# Writing " + file.getAbsolutePath());
-                    PrintStream out = new PrintStream(new FileOutputStream(file));
-                    printDotSyntax(out, file.getName());
-                    out.close();
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-        AccessController.doPrivileged(action);
-    }
-
     public static void main(String[] args) {
         try {
-            //System.setSecurityManager(new RMISecurityManager());
             ShowDotDepends si = new ShowDotDepends();
-            if (System.getProperty(DISALLOWED_PACKAGES) != null) {
-                Vector list = new Vector();
-                StringTokenizer st = new StringTokenizer(
-                        System.getProperty(DISALLOWED_PACKAGES), ",");
-                while (st.hasMoreTokens()) {
-                    list.addElement(st.nextToken().trim());
-                }
-                si.disallowedPackages = new String[list.size()];
-                list.copyInto(si.disallowedPackages);
-            } else {
-                si.disallowedPackages = SUN_PACKAGES;
-            }
-
+            si.disallowedPackages = getDisallowedPackages();
 
             String filename = null;
             for (int i = 0; i < args.length; i++) {
@@ -173,5 +138,3 @@ public class ShowDotDepends extends BaseDepHelper {
         }
     }
 }
-
-

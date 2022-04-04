@@ -20,11 +20,10 @@
 package com.plexobject.deps;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public class ShowDepend extends BaseDepHelper {
     public ShowDepend() {
@@ -90,25 +89,6 @@ public class ShowDepend extends BaseDepHelper {
         Arrays.sort(imports);
         return imports;
     }
-
-    public void printDotSyntax(final String filename) {
-        PrivilegedAction action = new PrivilegedAction() {
-            public Object run() {
-                try {
-                    File file = new File(filename);
-                    if (verbose) System.err.println("# Writing " + file.getAbsolutePath());
-                    PrintStream out = new PrintStream(new FileOutputStream(file));
-                    printDotSyntax(out, file.getName());
-                    out.close();
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        };
-        AccessController.doPrivileged(action);
-    }
-
 
     public static void main(String[] args) {
         try {
