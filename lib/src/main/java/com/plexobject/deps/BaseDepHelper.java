@@ -180,8 +180,16 @@ public abstract class BaseDepHelper {
     }
 
     boolean acceptClass(String name) {
-        if (name.contains("Exception") || name.startsWith("java.lang.") && name.indexOf('.', 10) == -1)
+        if (name.contains("Exception") || name.startsWith("java") && name.indexOf('.', 10) == -1)
             return false;
+        if (includes(skipList, name)) {
+            if (verbose) System.err.println("# found in skip list, skipping " + name);
+            return false;
+        }
+        if (mustList.size() > 0 && includes(mustList, name)) {
+            if (verbose) System.err.println("# not in must list, skipping " + name);
+            return false;
+        }
         for (int i = 0; i < disallowedPackages.length; i++) {
             if (name.startsWith(disallowedPackages[i])) return false;
         }
@@ -197,10 +205,18 @@ public abstract class BaseDepHelper {
 
 
     boolean acceptClass(Class originaltype, String name) {
-        if (name.contains("Exception") || name.startsWith("java.lang.") && name.indexOf('.', 10) == -1)
+        if (name.contains("Exception") || name.startsWith("java") && name.indexOf('.', 10) == -1)
             return false;
         // inner or nested class
         if (name.startsWith(originaltype.getName())) return false;
+        if (includes(skipList, name)) {
+            if (verbose) System.err.println("# found in skip list, skipping " + name);
+            return false;
+        }
+        if (mustList.size() > 0 && includes(mustList, name)) {
+            if (verbose) System.err.println("# not in must list, skipping " + name);
+            return false;
+        }
         // same package
         if (originaltype.getPackage() != null &&
                 name.startsWith(originaltype.getPackage().getName()) &&

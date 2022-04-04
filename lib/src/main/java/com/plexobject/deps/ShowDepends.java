@@ -40,12 +40,8 @@ public class ShowDepends extends BaseDepHelper {
         }
         Vector importlist = new Vector();
         try {
-            if (includes(skipList, name)) {
-                if (verbose) System.err.println("# ** found in skip list, skipping " + name);
-                return new String[0];
-            }
-            if (mustList.size() > 0 && includes(mustList, name)) {
-                if (verbose) System.err.println("# ** not in must list, skipping " + name);
+            if (!acceptClass(name)) {
+                if (verbose) System.err.println("# ** skipping " + name);
                 return new String[0];
             }
             ///
