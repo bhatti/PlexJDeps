@@ -436,7 +436,7 @@ public class TypesExtractor {
                 int end = location.indexOf('!');
                 return location.substring(start + 1, end);
             }
-            //System.err.println("Failed to find resource '" + resource + "' at [" + location + "] url [" + url + "]");
+            System.err.println("Failed to find resource '" + resource + "' at [" + location + "] url [" + url + "]");
             return null;
         }
         //System.out.println("******* location " + location);

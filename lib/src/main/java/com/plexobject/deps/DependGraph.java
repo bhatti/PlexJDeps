@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-public class DependGraph {
+public class DependGraph extends BaseDepHelper {
     private class DependencyLocator extends ClassLoader {
         private DependencyLocator() {
             cache = new java.util.Hashtable();
@@ -161,20 +161,6 @@ public class DependGraph {
 
     ////////////////////////////////////////////////////////////////////////
     // PRIVATE METHODS
-    private boolean acceptClass(String name) {
-        if (processed.indexOf(name) != -1) return false;
-        for (int i = 0; i < disallowedPackages.length; i++) {
-            if (name.startsWith(disallowedPackages[i])) return false;
-        }
-        for (int i = 0; i < BaseDepHelper.SUN_CLASSES.length; i++) {
-            if (name.equals(BaseDepHelper.SUN_CLASSES[i])) return false;
-        }
-        if (pkgNames.length == 0) return true;
-        for (int j = 0; j < pkgNames.length; j++) {
-            if (name.startsWith(pkgNames[j])) return true;
-        }
-        return false;
-    }
 
     private static void usage() {
         System.err.println("Usage: java " + DependGraph.class.getName() +

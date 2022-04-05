@@ -19,15 +19,11 @@
 
 package com.plexobject.deps;
 
-import com.plexobject.aop.Trace;
-import com.plexobject.aop.TraceCollector;
-import com.plexobject.graph.UMLDiagrams;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public class ShowDepend extends BaseDepHelper {
     public ShowDepend() {
@@ -47,7 +43,7 @@ public class ShowDepend extends BaseDepHelper {
                 return new String[0];
             }
             ///
-            Class clazz = Class.forName(name);
+            Class clazz = getClass().getClassLoader().loadClass(name);
             Class type = TypesExtractor.getComponentType(clazz);
 
             String[] reftypes = TypesExtractor.extractTypesUsingReflection(type);

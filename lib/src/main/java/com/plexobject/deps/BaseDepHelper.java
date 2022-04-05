@@ -204,8 +204,12 @@ public abstract class BaseDepHelper {
         }
         if (pkgNames == null || pkgNames.length == 0) return true;
         for (int j = 0; j < pkgNames.length; j++) {
-            if (name.startsWith(pkgNames[j])) return true;
+            if (name.startsWith(pkgNames[j])) {
+                if (verbose) System.err.println("# accepting " + name + "--- " + pkgNames[j]);
+                return true;
+            }
         }
+        if (verbose) System.err.println("# rejecting " + name);
         return false;
     }
 
