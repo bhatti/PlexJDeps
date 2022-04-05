@@ -202,14 +202,16 @@ public abstract class BaseDepHelper {
         for (int i = 0; i < SUN_CLASSES.length; i++) {
             if (name.equals(SUN_CLASSES[i])) return false;
         }
-        if (pkgNames == null || pkgNames.length == 0) return true;
+        if (pkgNames == null || pkgNames.length == 0) {
+            return true;
+        }
         for (int j = 0; j < pkgNames.length; j++) {
             if (name.startsWith(pkgNames[j])) {
-                if (verbose) System.err.println("# accepting " + name + "--- " + pkgNames[j]);
+                //if (verbose) System.err.println("# accepting " + name + "--- " + pkgNames[j]);
                 return true;
             }
         }
-        if (verbose) System.err.println("# rejecting " + name);
+        //if (verbose) System.err.println("# rejecting " + name);
         return false;
     }
 
@@ -261,6 +263,9 @@ public abstract class BaseDepHelper {
             return;
         }
         processed.add(klass);
+        if (!acceptClass(klass)) {
+            return;
+        }
         if (checkSM && System.getSecurityManager() != null) {
             if (verbose) System.err.println("# set security manager");
             checkSM = false;
@@ -481,7 +486,8 @@ public abstract class BaseDepHelper {
                     png.close();
                 }
             }
-        } catch (Exception e) {
+        } catch (ClassNotFoundException e) {
+        } catch (Throwable e) {
             System.err.println(e);
         }
     }

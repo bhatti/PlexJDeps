@@ -99,7 +99,7 @@ public class ShowDepends extends BaseDepHelper {
             if (verbose) System.err.println("# not in must list, skipping " + klass);
             return;
         }
-        if (verbose) System.err.println("# adding " + klass);
+        if (verbose) System.err.println("** adding " + klass);
         String[] deps = getDepends(klass);
         if (packageOnly) {
             klass = klass.substring(0, klass.lastIndexOf('.'));
