@@ -397,7 +397,7 @@ public abstract class BaseDepHelper {
             sb.append("...<br align=\"left\"/>");
             return sb.toString();
         } catch (Throwable e) {
-            return " +property <br align=\"left\"/>...<br align=\"left\"/>";
+            return " ...<br align=\"left\"/>";
         }
     }
 
