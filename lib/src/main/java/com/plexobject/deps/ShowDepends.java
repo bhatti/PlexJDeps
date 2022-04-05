@@ -95,7 +95,7 @@ public class ShowDepends extends BaseDepHelper {
             if (verbose) System.err.println("# found in skip list, skipping " + klass);
             return;
         }
-        if (mustList.size() > 0 && includes(mustList, klass)) {
+        if (mustList.size() > 0 && !includes(mustList, klass)) {
             if (verbose) System.err.println("# not in must list, skipping " + klass);
             return;
         }

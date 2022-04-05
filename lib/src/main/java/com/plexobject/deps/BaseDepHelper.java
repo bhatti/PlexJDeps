@@ -185,13 +185,14 @@ public abstract class BaseDepHelper {
     }
 
     boolean acceptClass(String name) {
-        if (name.contains("Exception") || name.startsWith("java") && name.indexOf('.', 10) == -1)
+        if (name.contains("Exception") || name.startsWith("java")) {
             return false;
+        }
         if (includes(skipList, name)) {
             if (verbose) System.err.println("# found in skip list, skipping " + name);
             return false;
         }
-        if (mustList.size() > 0 && includes(mustList, name)) {
+        if (mustList.size() > 0 && !includes(mustList, name)) {
             if (verbose) System.err.println("# not in must list, skipping " + name);
             return false;
         }
@@ -210,15 +211,16 @@ public abstract class BaseDepHelper {
 
 
     boolean acceptClass(Class originaltype, String name) {
-        if (name.contains("Exception") || name.startsWith("java") && name.indexOf('.', 10) == -1)
+        if (name.contains("Exception") || name.startsWith("java")) {
             return false;
+        }
         // inner or nested class
         if (name.startsWith(originaltype.getName())) return false;
         if (includes(skipList, name)) {
             if (verbose) System.err.println("# found in skip list, skipping " + name);
             return false;
         }
-        if (mustList.size() > 0 && includes(mustList, name)) {
+        if (mustList.size() > 0 && !includes(mustList, name)) {
             if (verbose) System.err.println("# not in must list, skipping " + name);
             return false;
         }
@@ -263,7 +265,7 @@ public abstract class BaseDepHelper {
             if (verbose) System.err.println("# found in skip list, skipping " + klass);
             return;
         }
-        if (mustList.size() > 0 && includes(mustList, klass)) {
+        if (mustList.size() > 0 && !includes(mustList, klass)) {
             if (verbose) System.err.println("# not in must list, skipping " + klass);
             return;
         }
@@ -465,7 +467,7 @@ public abstract class BaseDepHelper {
         try {
             Class clazz = Class.forName(main);
             Method m = clazz.getDeclaredMethod("main", String[].class);
-            m.invoke(null, args);
+            m.invoke(null, (Object[]) args);
             for (List<Trace> traces : TraceCollector.getInstance().getAll().values()) {
                 for (Trace trace : traces) {
                     System.out.println(trace.buildSequenceConfig());
