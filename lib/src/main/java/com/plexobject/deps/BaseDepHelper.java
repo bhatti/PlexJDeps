@@ -185,7 +185,7 @@ public abstract class BaseDepHelper {
     }
 
     boolean acceptClass(String name) {
-        if (name.contains("Exception") || name.startsWith("java")) {
+        if (name.contains("Exception") || name.contains("$") || name.startsWith("java")) {
             return false;
         }
         if (includes(skipList, name)) {
@@ -217,7 +217,7 @@ public abstract class BaseDepHelper {
 
 
     boolean acceptClass(Class originaltype, String name) {
-        if (name.contains("Exception") || name.startsWith("java")) {
+        if (name.contains("Exception") || name.contains("$") || name.startsWith("java")) {
             return false;
         }
         // inner or nested class

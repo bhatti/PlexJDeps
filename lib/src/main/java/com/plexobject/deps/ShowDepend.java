@@ -68,9 +68,9 @@ public class ShowDepend extends BaseDepHelper {
                 }
             }
         } catch (java.lang.ClassNotFoundException e) {
-            System.err.println("Failed to add (" + name + ") " + e);
+            if (verbose) System.err.println("Failed to add (" + name + ") " + e);
         } catch (java.lang.NoClassDefFoundError e) {
-            System.err.println("Failed to add (" + name + ") " + e);
+            if (verbose) System.err.println("Failed to add (" + name + ") " + e);
         } catch (Throwable e) {
             e.printStackTrace();
         }
