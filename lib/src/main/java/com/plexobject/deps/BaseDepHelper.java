@@ -107,6 +107,9 @@ public abstract class BaseDepHelper {
             return;
         }
         visited.add(key);
+        if (!acceptClass(key)) {
+            return;
+        }
         String[] depend = (String[]) dependencies.get(key);
         if (depend == null) {
             return;
