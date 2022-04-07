@@ -112,6 +112,7 @@ public abstract class BaseDepHelper {
         }
         String[] depend = (String[]) dependencies.get(key);
         if (depend == null) {
+            if (verbose) System.err.println("# deps for " + key);
             return;
         }
         for (int i = 0; i < depend.length; i++) {
@@ -189,6 +190,7 @@ public abstract class BaseDepHelper {
 
     boolean acceptClass(String name) {
         if (name.contains("Exception") || name.contains("$") || name.startsWith("java")) {
+            if (verbose) System.err.println("# rejecting interal type " + name);
             return false;
         }
         if (includes(skipList, name)) {
@@ -200,21 +202,28 @@ public abstract class BaseDepHelper {
             return false;
         }
         for (int i = 0; i < disallowedPackages.length; i++) {
-            if (name.startsWith(disallowedPackages[i])) return false;
+            if (name.startsWith(disallowedPackages[i])) {
+                if (verbose) System.err.println("# skipping disallowed " + name);
+                return false;
+            }
         }
         for (int i = 0; i < SUN_CLASSES.length; i++) {
-            if (name.equals(SUN_CLASSES[i])) return false;
+            if (name.equals(SUN_CLASSES[i])) {
+                if (verbose) System.err.println("# skipping sun classes " + name);
+                return false;
+            }
         }
         if (pkgNames == null || pkgNames.length == 0) {
+            if (verbose) System.err.println("# accepting " + name + " without package");
             return true;
         }
         for (int j = 0; j < pkgNames.length; j++) {
             if (name.startsWith(pkgNames[j])) {
-                //if (verbose) System.err.println("# accepting " + name + "--- " + pkgNames[j]);
+                if (verbose) System.err.println("# accepting " + name + " for package " + pkgNames[j]);
                 return true;
             }
         }
-        //if (verbose) System.err.println("# rejecting " + name);
+        if (verbose) System.err.println("# rejecting " + name);
         return false;
     }
 
@@ -263,6 +272,7 @@ public abstract class BaseDepHelper {
 
     public void addClassDepend(String klass) {
         if (processed.contains(klass)) {
+            if (verbose) System.err.println("# already processed " + klass);
             return;
         }
         processed.add(klass);
