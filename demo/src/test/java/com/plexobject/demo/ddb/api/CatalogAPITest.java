@@ -2,12 +2,11 @@ package com.plexobject.demo.ddb.api;
 
 import com.plexobject.aop.Trace;
 import com.plexobject.aop.TraceCollector;
-import com.plexobject.demo.ddb.model.CatalogItem;
-import com.plexobject.demo.ddb.service.CatalogService;
 import com.plexobject.deps.ShowDepend;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 
 public class CatalogAPITest {
@@ -31,7 +30,7 @@ public class CatalogAPITest {
 
     @Test
     void testSaveCatalogDeps() {
-        ShowDepend si = new ShowDepend(false, new String[]{"com.plexobject.demo"}, false);
+        ShowDepend si = new ShowDepend(false, new String[]{"com.plexobject.demo"}, Collections.emptyList(), false);
         si.addClassDepend(CatalogAPI.class.getName());
         si.printDotSyntax(System.out, "");
     }

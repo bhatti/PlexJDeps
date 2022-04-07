@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.List;
 
 public class AOPTraceTest {
@@ -43,14 +44,14 @@ public class AOPTraceTest {
 
     @Test
     void testShowDepends() throws Exception {
-        ShowDepends si = new ShowDepends(true, new String[]{"com.demo"}, true);
+        ShowDepends si = new ShowDepends(true, new String[]{"com.demo"}, Collections.emptyList(), true);
         si.addJaxClasses();
         si.search(DatabaseStore.class.getName());
     }
 
     @Test
     void testShowDepend() {
-        ShowDepend si = new ShowDepend(true, new String[]{"com.demo"}, true);
+        ShowDepend si = new ShowDepend(true, new String[]{"com.demo"}, Collections.emptyList(), true);
         si.addClassDepend(DatabaseStore.class.getName());
         si.printDotSyntax(System.out, "");
     }

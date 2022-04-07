@@ -223,7 +223,7 @@ public abstract class BaseDepHelper {
                 return true;
             }
         }
-        if (verbose) System.err.println("# rejecting " + name);
+        if (verbose) System.err.println("# rejecting " + name + " --- " + Arrays.toString(pkgNames));
         return false;
     }
 

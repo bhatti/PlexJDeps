@@ -26,10 +26,11 @@ public class ShowDepends extends BaseDepHelper {
     public ShowDepends() {
     }
 
-    public ShowDepends(boolean packageOnly, String[] pkgNames, boolean dotSyntax) {
+    public ShowDepends(boolean packageOnly, String[] pkgNames, List<String> mustList, boolean dotSyntax) {
         this.packageOnly = packageOnly;
         this.pkgNames = pkgNames;
         this.springParser.pkgNames = pkgNames;
+        this.mustList.addAll(mustList);
         this.dotSyntax = dotSyntax;
     }
 

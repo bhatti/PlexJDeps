@@ -20,18 +20,16 @@
 package com.plexobject.deps;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
 
 public class ShowDepend extends BaseDepHelper {
     public ShowDepend() {
     }
 
-    public ShowDepend(boolean packageOnly, String[] pkgNames, boolean verbose) {
+    public ShowDepend(boolean packageOnly, String[] pkgNames, List<String> mustList, boolean verbose) {
         this.packageOnly = packageOnly;
         this.pkgNames = pkgNames;
+        this.mustList.addAll(mustList);
         this.verbose = verbose;
     }
 
