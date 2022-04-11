@@ -171,9 +171,12 @@ public class ShowDepends extends BaseDepHelper {
             } else if (args[i].equals("-o")) {
                 filename = args[++i];
                 if (si.verbose) System.err.println("# will save output to " + filename);
-            } else if (args[i].equals("-s")) {
+            } else if (args[i].equals("-k")) {
                 si.skipList.add(args[++i]);
                 if (si.verbose) System.err.println("# adding to skip list: " + args[i]);
+            } else if (args[i].equals("-s")) {
+                si.sequenceMain = args[++i];
+                if (si.verbose) System.err.println("# adding to UML Sequence : " + args[i]);
             } else if (args[i].equals("-m")) {
                 si.mustList.add(args[++i]);
                 if (si.verbose) System.err.println("# adding to must list: " + args[i]);
@@ -200,8 +203,8 @@ public class ShowDepends extends BaseDepHelper {
                 si.search(d);
             }
         }
-        if (!si.processed.isEmpty()) {
-            sequenceDigrams(si.processed.iterator().next(), args);
+        if (si.sequenceMain != null) {
+            sequenceDigrams(si.sequenceMain, args);
         }
     }
 }

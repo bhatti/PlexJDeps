@@ -56,6 +56,7 @@ public abstract class BaseDepHelper {
     String filter;
 
     String[] disallowedPackages = BaseDepHelper.SUN_PACKAGES;
+    String sequenceMain;
     final Map dependencies = new HashMap();
     final List skipList = new ArrayList();
     final List mustList = new ArrayList();
