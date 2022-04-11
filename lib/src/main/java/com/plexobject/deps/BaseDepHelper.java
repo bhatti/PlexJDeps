@@ -66,9 +66,11 @@ public abstract class BaseDepHelper {
     public void addMust(String must) {
         mustList.add(must);
     }
+
     public void addSkip(String skip) {
         skipList.add(skip);
     }
+
     public void printDotSyntax(final String filename) {
         PrivilegedAction action = new PrivilegedAction() {
             public Object run() {
@@ -409,10 +411,16 @@ public abstract class BaseDepHelper {
             Class clazz = Class.forName(t);
             Field[] fields = clazz.getDeclaredFields();
             StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < 2 && i < fields.length; i++) {
-                sb.append(" +" + fields[i].getName() + " <br align=\"left\"/>");
+            int nf = 0;
+            for (int i = 0; i < fields.length; i++) {
+                if (nf < 5 && !Character.isUpperCase(fields[i].getName().charAt(0))) {
+                    sb.append(" +" + fields[i].getName() + ": " + fields[i].getType().getSimpleName() + " <br align=\"left\"/>");
+                    nf++;
+                }
             }
-            sb.append("...<br align=\"left\"/>");
+            if (fields.length > 5) {
+                sb.append("...<br align=\"left\"/>");
+            }
             return sb.toString();
         } catch (Throwable e) {
             return " ...<br align=\"left\"/>";
