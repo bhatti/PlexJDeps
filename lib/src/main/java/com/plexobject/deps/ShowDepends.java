@@ -26,11 +26,10 @@ public class ShowDepends extends BaseDepHelper {
     public ShowDepends() {
     }
 
-    public ShowDepends(boolean packageOnly, String[] pkgNames, List<String> mustList, boolean dotSyntax) {
+    public ShowDepends(boolean packageOnly, String[] pkgNames, boolean dotSyntax) {
         this.packageOnly = packageOnly;
         this.pkgNames = pkgNames;
         this.springParser.pkgNames = pkgNames;
-        this.mustList.addAll(mustList);
         this.dotSyntax = dotSyntax;
     }
 
@@ -202,7 +201,7 @@ public class ShowDepends extends BaseDepHelper {
             }
         }
         if (!si.processed.isEmpty()) {
-            sequenceDigrams(si.processed.get(0), args);
+            sequenceDigrams(si.processed.iterator().next(), args);
         }
     }
 }

@@ -44,14 +44,14 @@ public class AOPTraceTest {
 
     @Test
     void testShowDepends() throws Exception {
-        ShowDepends si = new ShowDepends(true, new String[]{"com.demo"}, Collections.emptyList(), true);
+        ShowDepends si = new ShowDepends(true, new String[]{"com.demo"}, true);
         si.addJaxClasses();
         si.search(DatabaseStore.class.getName());
     }
 
     @Test
     void testShowDepend() {
-        ShowDepend si = new ShowDepend(true, new String[]{"com.demo"}, Collections.emptyList(), true);
+        ShowDepend si = new ShowDepend(true, new String[]{"com.demo"}, true);
         si.addClassDepend(DatabaseStore.class.getName());
         si.printDotSyntax(System.out, "");
     }

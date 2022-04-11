@@ -24,13 +24,12 @@ import java.util.*;
 
 public class ShowDotDepends extends BaseDepHelper {
     public ShowDotDepends() {
-        this(false, SUN_CLASSES, Collections.emptyList(), false);
+        this(false, SUN_CLASSES, false);
     }
 
-    public ShowDotDepends(boolean packageOnly, String[] pkgNames, List<String> mustList, boolean verbose) {
+    public ShowDotDepends(boolean packageOnly, String[] pkgNames, boolean verbose) {
         this.packageOnly = packageOnly;
         this.pkgNames = pkgNames;
-        this.mustList.addAll(mustList);
         this.verbose = verbose;
     }
 
@@ -127,7 +126,7 @@ public class ShowDotDepends extends BaseDepHelper {
             if (filename == null) si.printDotSyntax(System.out, "");
             else si.printDotSyntax(filename);
             if (!si.processed.isEmpty()) {
-                sequenceDigrams(si.processed.get(0), args);
+                sequenceDigrams(si.processed.iterator().next(), args);
             }
         } catch (Exception e) {
             e.printStackTrace();

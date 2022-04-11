@@ -11,7 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -40,7 +39,7 @@ public class MusicAPITest {
 
     @Test
     void tesSaveMusicDeps() throws IOException, ExecutionException, InterruptedException {
-        ShowDepend si = new ShowDepend(false, new String[]{"com.plexobject.demo", "com.amazonaws.services.dynamodbv3"}, Collections.emptyList(), false);
+        ShowDepend si = new ShowDepend(false, new String[]{"com.plexobject.demo", "com.amazonaws.services.dynamodbv3"}, false);
         si.addClassDepend(MusicAPI.class.getName());
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(bout);

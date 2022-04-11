@@ -59,11 +59,16 @@ public abstract class BaseDepHelper {
     final Map dependencies = new HashMap();
     final List skipList = new ArrayList();
     final List mustList = new ArrayList();
-    final List<String> processed = new ArrayList<>();
+    final Set<String> processed = new HashSet<>();
     final SpringParser springParser = new SpringParser();
     final JaxParser jaxParser = new JaxParser();
 
-
+    public void addMust(String must) {
+        mustList.add(must);
+    }
+    public void addSkip(String skip) {
+        skipList.add(skip);
+    }
     public void printDotSyntax(final String filename) {
         PrivilegedAction action = new PrivilegedAction() {
             public Object run() {

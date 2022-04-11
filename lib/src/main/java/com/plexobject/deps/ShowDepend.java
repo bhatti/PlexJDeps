@@ -20,16 +20,18 @@
 package com.plexobject.deps;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 public class ShowDepend extends BaseDepHelper {
     public ShowDepend() {
     }
 
-    public ShowDepend(boolean packageOnly, String[] pkgNames, List<String> mustList, boolean verbose) {
+    public ShowDepend(boolean packageOnly, String[] pkgNames, boolean verbose) {
         this.packageOnly = packageOnly;
         this.pkgNames = pkgNames;
-        this.mustList.addAll(mustList);
         this.verbose = verbose;
     }
 
@@ -127,7 +129,7 @@ public class ShowDepend extends BaseDepHelper {
             if (filename == null) si.printDotSyntax(System.out, "");
             else si.printDotSyntax(filename);
             if (!si.processed.isEmpty()) {
-                sequenceDigrams(si.processed.get(0), args);
+                sequenceDigrams(si.processed.iterator().next(), args);
             }
         } catch (Exception e) {
             e.printStackTrace();
