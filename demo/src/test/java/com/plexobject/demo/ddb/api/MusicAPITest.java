@@ -2,6 +2,7 @@ package com.plexobject.demo.ddb.api;
 
 import com.plexobject.aop.Trace;
 import com.plexobject.aop.TraceCollector;
+import com.plexobject.demo.service.GameServiceImpl;
 import com.plexobject.deps.ShowDepend;
 import com.plexobject.graph.UMLDiagrams;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +36,20 @@ public class MusicAPITest {
                 png.close();
             }
         }
+    }
+
+    @Test
+    void testShowDependPackages() throws Exception {
+        ShowDepend si = new ShowDepend(true, new String[]{"com.plexobject.demo"}, false);
+        si.addClassDepend(MusicAPI.class.getName());
+        si.printDotSyntax(System.out, "");
+    }
+
+    @Test
+    void testShowDepend() throws Exception {
+        ShowDepend si = new ShowDepend(false, new String[]{"com.plexobject.demo"}, false);
+        si.addClassDepend(MusicAPI.class.getName());
+        si.printDotSyntax(System.out, "");
     }
 
     @Test

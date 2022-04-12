@@ -99,7 +99,11 @@ public abstract class BaseDepHelper {
         out.println("  labelloc=\"t\"");
         out.println("  label=\"" + title + "\"");
         out.println("  graph [splines=false]");
-        out.println("  node [shape=record style=filled fillcolor=gray95]");
+        if (packageOnly) {
+            out.println("  node [shape=tab style=filled fillcolor=gray95]");
+        } else {
+            out.println("  node [shape=record style=filled fillcolor=gray95]");
+        }
         out.println("  edge [arrowhead=vee style=dashed]");
         Iterator it = dependencies.keySet().iterator();
         Set visited = new HashSet();
@@ -129,26 +133,49 @@ public abstract class BaseDepHelper {
             printDotSyntax(out, duplicates, to, visited);
         }
     }
+    boolean hasCycle(String from, String to) {
+        String[] deps = (String[]) dependencies.get(to);
+        if (deps == null || deps.length == 0) {
+            return false;
+        }
+        for (String d : deps) {
+            if (from.equals(d)) {
+                //System.err.println("##--duplicate from " + from + " -> " + to);
+                return true;
+            }
+        }
+        for (String d : deps) {
+            if (hasCycle(from, d)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     void printDotSyntax(PrintStream out, Map duplicates, String key, String to) {
         if (acceptClass(to)) {
             String dotKey = Dependency.getClassName(key);
             String dotTo = Dependency.getClassName(to);
-            if (duplicates.get(key + "_node") == null) {
-                duplicates.put(key + "_node", Boolean.TRUE);
-                out.println("  " + dotKey + "[label = <{<b>«" + key + "»</b> | " + getDotClassFields(key) + "}>]");
-            }
-            if (duplicates.get(to + "_node") == null) {
-                duplicates.put(to + "_node", Boolean.TRUE);
-                out.println("  " + dotTo + "[label = <{<b>«" + to + "»</b> | " + getDotClassFields(to) + "}>]");
+            if (!packageOnly) {
+                if (duplicates.get(key + "_node") == null) {
+                    duplicates.put(key + "_node", Boolean.TRUE);
+                    out.println("  " + dotKey + "[label = <{<b>«" + key + "»</b> | " + getDotClassFields(key) + "}>]");
+                }
+                if (duplicates.get(to + "_node") == null) {
+                    duplicates.put(to + "_node", Boolean.TRUE);
+                    out.println("  " + dotTo + "[label = <{<b>«" + to + "»</b> | " + getDotClassFields(to) + "}>]");
+                }
             }
             String line = "  \"" + dotKey + "\"" + " -> " + "\"" + dotTo + "\"";
-            String oline = "  \"" + dotTo + "\"" + " -> " + "\"" + dotKey + "\"";
+            String rline = "  \"" + dotTo + "\"" + " -> " + "\"" + dotKey + "\"";
             if (duplicates.get(line) == null) {
                 duplicates.put(line, Boolean.TRUE);
-                out.println(line);
-                if (duplicates.get(oline) != null) {
-                    //out.println("#--duplicate " + line);
+                if (duplicates.get(rline) != null || hasCycle(key, to)) {
+                    line = line + "[arrowsize=2 color=\"red\"]";
+                    out.println(line);
+                    //System.err.println("##--duplicate " + line);
+                } else {
+                    out.println(line);
                 }
             }
         }
