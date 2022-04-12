@@ -1,13 +1,13 @@
-#PlexJDeps - Dependency Graph
+# PlexJDeps - Dependency Graph
 
-##Overview
+## Overview
 
 Creates dot files for class or package dependencies and generates sequence diagrams for unit tests.
 
-##Version
+## Version
  - 0.1 : experimental
  
-##License
+## License
  - MIT
 
 ## How To Guide
