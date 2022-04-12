@@ -133,6 +133,7 @@ public abstract class BaseDepHelper {
             printDotSyntax(out, duplicates, to, visited);
         }
     }
+
     boolean hasCycle(String from, String to) {
         String[] deps = (String[]) dependencies.get(to);
         if (deps == null || deps.length == 0) {
@@ -535,11 +536,18 @@ public abstract class BaseDepHelper {
         return false;
     }
 
-    static void sequenceDigrams(String main, String[] args) {
+    static void sequenceDigrams(String main, String[] args) throws Exception {
         try {
             Class clazz = Class.forName(main);
-            Method m = clazz.getDeclaredMethod("main", String[].class);
-            m.invoke(null, (Object[]) args);
+            Method m = clazz.getMethod("main", String[].class);
+            m.invoke(null, new Object[]{args});
+        } catch (NoSuchMethodException e) {
+        } catch (ClassNotFoundException e) {
+        } catch (Throwable e) {
+            e.printStackTrace();
+            System.err.println("Failed to create sequence diagram " + main + " due to " + e);
+        } finally {
+            System.err.println("# traces " + TraceCollector.getInstance().getAll().values().size());
             for (List<Trace> traces : TraceCollector.getInstance().getAll().values()) {
                 for (Trace trace : traces) {
                     System.out.println(trace.buildSequenceConfig());
@@ -549,9 +557,6 @@ public abstract class BaseDepHelper {
                     png.close();
                 }
             }
-        } catch (ClassNotFoundException e) {
-        } catch (Throwable e) {
-            System.err.println(e);
         }
     }
 }

@@ -16,4 +16,8 @@ public class MusicAPI {
         items.setAwards(11);
         return ctr.saveMusic(items);
     }
+
+    public static void main(String[] args) {
+        new MusicAPI().saveMusic();
+    }
 }

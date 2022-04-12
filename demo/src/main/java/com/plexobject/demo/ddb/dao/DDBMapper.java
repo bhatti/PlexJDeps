@@ -74,7 +74,7 @@ public class DDBMapper {
         try {
             mapper.save(items);
         } catch (Exception e) {
-            System.err.println(e.toString());
+            System.err.println("failed to save " + e);
         }
         return items;
     }

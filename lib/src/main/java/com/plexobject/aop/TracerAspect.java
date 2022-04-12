@@ -15,13 +15,19 @@ public class TracerAspect {
     }
 
     @Around("callAt(wrap)")
-    public Object around(ProceedingJoinPoint pjp,
-                         Tracer wrap) throws Throwable {
-        Object result = pjp.proceed();
-        if ("method-execution".equals(pjp.getKind())) {
-            TraceCollector.getInstance().add(getTrace(pjp, result));
+    public Object around(ProceedingJoinPoint pjp, Tracer wrap) throws Throwable {
+        try {
+            Object result = pjp.proceed();
+            if ("method-execution".equals(pjp.getKind())) {
+                TraceCollector.getInstance().add(getTrace(pjp, result));
+            }
+            return result;
+        } catch (Throwable e) {
+            if ("method-execution".equals(pjp.getKind())) {
+                TraceCollector.getInstance().add(getTrace(pjp, null));
+            }
+            throw e;
         }
-        return result;
     }
 
     static String getPackage(ProceedingJoinPoint pjp) {
