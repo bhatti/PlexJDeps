@@ -156,14 +156,23 @@ public abstract class BaseDepHelper {
         if (acceptClass(to)) {
             String dotKey = Dependency.getClassName(key);
             String dotTo = Dependency.getClassName(to);
-            if (!packageOnly) {
+            if (packageOnly) {
                 if (duplicates.get(key + "_node") == null) {
-                    duplicates.put(key + "_node", Boolean.TRUE);
-                    out.println("  " + dotKey + "[label = <{<b>«" + key + "»</b> | " + getDotClassFields(key) + "}>]");
+                    out.println("  " + dotKey + "[label=\"" + key + "\"]");
+                    out.println("  " + dotKey);
                 }
                 if (duplicates.get(to + "_node") == null) {
                     duplicates.put(to + "_node", Boolean.TRUE);
-                    out.println("  " + dotTo + "[label = <{<b>«" + to + "»</b> | " + getDotClassFields(to) + "}>]");
+                    out.println("  " + dotTo + "[label=\"" + to + "\"]");
+                }
+            } else {
+                if (duplicates.get(key + "_node") == null) {
+                    duplicates.put(key + "_node", Boolean.TRUE);
+                    out.println("  " + dotKey + "[label=<{<b>«" + key + "»</b> | " + getDotClassFields(key) + "}>]");
+                }
+                if (duplicates.get(to + "_node") == null) {
+                    duplicates.put(to + "_node", Boolean.TRUE);
+                    out.println("  " + dotTo + "[label=<{<b>«" + to + "»</b> | " + getDotClassFields(to) + "}>]");
                 }
             }
             String line = "  \"" + dotKey + "\"" + " -> " + "\"" + dotTo + "\"";
