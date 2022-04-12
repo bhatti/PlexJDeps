@@ -134,7 +134,11 @@ public abstract class BaseDepHelper {
         }
     }
 
-    boolean hasCycle(String from, String to) {
+    boolean hasCycle(String from, String to, Set<String> visited) {
+        if (visited.contains(to)) {
+            return false;
+        }
+        visited.add(to);
         String[] deps = (String[]) dependencies.get(to);
         if (deps == null || deps.length == 0) {
             return false;
@@ -146,7 +150,7 @@ public abstract class BaseDepHelper {
             }
         }
         for (String d : deps) {
-            if (hasCycle(from, d)) {
+            if (hasCycle(from, d, visited)) {
                 return true;
             }
         }
@@ -180,7 +184,7 @@ public abstract class BaseDepHelper {
             String rline = "  \"" + dotTo + "\"" + " -> " + "\"" + dotKey + "\"";
             if (duplicates.get(line) == null) {
                 duplicates.put(line, Boolean.TRUE);
-                if (duplicates.get(rline) != null || hasCycle(key, to)) {
+                if (duplicates.get(rline) != null || hasCycle(key, to, new HashSet<>())) {
                     line = line + "[arrowsize=2 color=\"red\"]";
                     out.println(line);
                     //System.err.println("##--duplicate " + line);
